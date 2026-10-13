@@ -1,5 +1,5 @@
 # SMField — Visão do Produto
-
+## Participantes: Raissa, Tayná, João, Arthur Henrique, Brenner.
 ## 1. Identificação do projeto
 
 **Nome:** SMField — Monitoramento Inteligente e Análise de Riscos Agrícolas
