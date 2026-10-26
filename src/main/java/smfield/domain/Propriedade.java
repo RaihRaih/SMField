@@ -1,4 +1,4 @@
-package src.main.java.domain;
+package smfield.domain;
 
 public class Propriedade {
 

@@ -1,0 +1,200 @@
+[
+ {
+  "nome": "Belo Horizonte",
+  "uf": "MG",
+  "meses": [
+   {
+    "temp_media": 23.5,
+    "chuva_mm": 300,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23.8,
+    "chuva_mm": 180,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23.3,
+    "chuva_mm": 160,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 22.2,
+    "chuva_mm": 60,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 20.2,
+    "chuva_mm": 25,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 19,
+    "chuva_mm": 10,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 18.8,
+    "chuva_mm": 10,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 20.3,
+    "chuva_mm": 10,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 22,
+    "chuva_mm": 45,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 120,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 235,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23.3,
+    "chuva_mm": 330,
+    "prob_geada": 0
+   }
+  ]
+ },
+ {
+  "nome": "Passo Fundo",
+  "uf": "RS",
+  "meses": [
+   {
+    "temp_media": 23,
+    "chuva_mm": 150,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 140,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 21,
+    "chuva_mm": 130,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 18,
+    "chuva_mm": 150,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 15,
+    "chuva_mm": 140,
+    "prob_geada": 0.15
+   },
+   {
+    "temp_media": 13,
+    "chuva_mm": 150,
+    "prob_geada": 0.5
+   },
+   {
+    "temp_media": 13,
+    "chuva_mm": 130,
+    "prob_geada": 0.5
+   },
+   {
+    "temp_media": 14,
+    "chuva_mm": 150,
+    "prob_geada": 0.3
+   },
+   {
+    "temp_media": 16,
+    "chuva_mm": 170,
+    "prob_geada": 0.1
+   },
+   {
+    "temp_media": 19,
+    "chuva_mm": 200,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 21,
+    "chuva_mm": 150,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 160,
+    "prob_geada": 0
+   }
+  ]
+ },
+ {
+  "nome": "Cuiabá",
+  "uf": "MT",
+  "meses": [
+   {
+    "temp_media": 27,
+    "chuva_mm": 220,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 27,
+    "chuva_mm": 200,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 27,
+    "chuva_mm": 190,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 26,
+    "chuva_mm": 100,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 24,
+    "chuva_mm": 50,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 10,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 23,
+    "chuva_mm": 10,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 25,
+    "chuva_mm": 25,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 27,
+    "chuva_mm": 70,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 28,
+    "chuva_mm": 140,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 27,
+    "chuva_mm": 180,
+    "prob_geada": 0
+   },
+   {
+    "temp_media": 27,
+    "chuva_mm": 220,
+    "prob_geada": 0
+   }
+  ]
+ }
+]
