@@ -1,8 +1,0 @@
-[
-  {"nome": "Milho", "ciclo_dias": 120, "temp_ideal_min": 20, "temp_ideal_max": 30, "temp_abs_min": 10, "temp_abs_max": 38, "chuva_min_mm": 400, "chuva_max_mm": 800, "sensivel_geada": true},
-  {"nome": "Soja", "ciclo_dias": 120, "temp_ideal_min": 22, "temp_ideal_max": 30, "temp_abs_min": 15, "temp_abs_max": 35, "chuva_min_mm": 450, "chuva_max_mm": 800, "sensivel_geada": true},
-  {"nome": "Feijão", "ciclo_dias": 90, "temp_ideal_min": 18, "temp_ideal_max": 27, "temp_abs_min": 10, "temp_abs_max": 35, "chuva_min_mm": 300, "chuva_max_mm": 500, "sensivel_geada": true},
-  {"nome": "Tomate", "ciclo_dias": 110, "temp_ideal_min": 18, "temp_ideal_max": 26, "temp_abs_min": 10, "temp_abs_max": 32, "chuva_min_mm": 400, "chuva_max_mm": 700, "sensivel_geada": true},
-  {"nome": "Mandioca", "ciclo_dias": 300, "temp_ideal_min": 20, "temp_ideal_max": 27, "temp_abs_min": 12, "temp_abs_max": 35, "chuva_min_mm": 800, "chuva_max_mm": 1500, "sensivel_geada": true},
-  {"nome": "Alface", "ciclo_dias": 60, "temp_ideal_min": 15, "temp_ideal_max": 22, "temp_abs_min": 5, "temp_abs_max": 30, "chuva_min_mm": 150, "chuva_max_mm": 300, "sensivel_geada": false}
-]
