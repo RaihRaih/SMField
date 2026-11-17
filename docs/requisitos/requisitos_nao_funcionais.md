@@ -2,32 +2,32 @@
 
 ## 1. Objetivo
 
-Este documento define os requisitos de qualidade, organização e desenvolvimento do SMField.
+Este documento define os requisitos de qualidade, organização e desenvolvimento do SMField e registra **como cada um foi atendido e verificado** ao final da Sprint 2.
 
 ## 2. Requisitos não funcionais
 
-| ID     | Requisito                      | Descrição                                                                                                                                          |
-| ------ | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RNF-01 | Tecnologia                     | O sistema deverá ser desenvolvido em Java utilizando Maven para gerenciamento do projeto.                                                          |
-| RNF-02 | Organização do código          | O projeto deverá ser organizado nas camadas `domain`, `service`, `infra` e `ui`.                                                                   |
-| RNF-03 | Separação de responsabilidades | As regras de negócio deverão ser separadas da interface gráfica.                                                                                   |
-| RNF-04 | Testes unitários               | As principais regras de negócio deverão possuir testes automatizados utilizando JUnit.                                                             |
-| RNF-05 | Testes de comportamento        | O projeto deverá possuir pelo menos cinco cenários automatizados utilizando Cucumber e Gherkin.                                                    |
-| RNF-06 | Cobertura de testes            | O projeto deverá buscar uma cobertura mínima de 80% nas classes de serviço e regras de negócio, utilizando uma ferramenta de medição de cobertura. |
-| RNF-07 | Validação de dados             | O sistema deverá validar as entradas e impedir o processamento de valores inválidos.                                                               |
-| RNF-08 | Versionamento e documentação   | O código-fonte e a documentação deverão ser mantidos no GitHub, com instruções de execução no arquivo README.md.                                   |
+| ID | Requisito | Descrição | Status | Evidência |
+|---|---|---|---|---|
+| RNF-01 | Tecnologia | Java e Maven. | Atendido | `pom.xml` (Java 21, `maven.compiler.release` = 21); `mvn clean verify` executado com sucesso. |
+| RNF-02 | Organização do código | Camadas `domain`, `service`, `infra` e `ui`. | Atendido | `src/main/java/{domain,service,infra,ui}` — 45 tipos Java; ver `docs/arquitetura/arquitetura-inicial.md`. |
+| RNF-03 | Separação de responsabilidades | Regras de negócio separadas da interface. | Atendido | Cálculo, classificação e validações ficam em `domain`/`service`; o pacote `ui` apenas chama serviços e exibe resultados. |
+| RNF-04 | Testes unitários | Principais regras com testes JUnit. | Atendido | 83 métodos de teste JUnit 5 (9 parametrizados), totalizando 133 execuções, 0 falhas. |
+| RNF-05 | Testes de comportamento | Pelo menos cinco cenários Cucumber/Gherkin automatizados. | Atendido | 3 arquivos `.feature`, 15 cenários executados (9 cenários + 6 exemplos de esquema), 77 passos, todos aprovados no `mvn verify`. |
+| RNF-06 | Cobertura de testes | Buscar 80% nas classes de serviço e regras de negócio, com ferramenta de medição. | Atendido (medido) | JaCoCo: `service` 99,2% e `domain` 98,9% de linhas; regra `check` no `pom.xml` falha o build abaixo de 80%. Total do projeto: 36,5% (a interface Swing não possui testes automatizados). |
+| RNF-07 | Validação de dados | Validar entradas e impedir valores inválidos. | Atendido | Campos obrigatórios, faixas, letras, NaN, infinito, datas inválidas/futuras, duplicidades e talhão/propriedade inexistentes são rejeitados com mensagens claras (telas 02, 04, 06, 07 e 08 em `docs/evidencias/telas`). |
+| RNF-08 | Versionamento e documentação | Código e documentação no GitHub, com instruções no README. | Atendido localmente | README com instruções de execução, testes e cobertura; histórico Git organizado em commits. A publicação no GitHub depende do `git push` da equipe (comandos no relatório). |
 
 ## 3. Critérios de qualidade
 
-O sistema será considerado adequado quando:
-
-* As funcionalidades principais estiverem funcionando.
-* As entradas inválidas forem tratadas corretamente.
-* As regras de cálculo de risco possuírem testes automatizados.
-* Os cenários de comportamento definidos estiverem automatizados.
-* A estrutura do projeto respeitar a separação de responsabilidades.
-* A documentação permitir que outro integrante da equipe execute o sistema.
+| Critério | Situação |
+|---|---|
+| As funcionalidades principais estão funcionando. | Sim — roteiro manual executado na interface real (`docs/evidencias`). |
+| As entradas inválidas são tratadas corretamente. | Sim — testes unitários, cenários BDD e roteiro de interface. |
+| As regras de cálculo de risco possuem testes automatizados. | Sim — `RiscoServiceTest` (46 execuções) e `risco.feature`. |
+| Os cenários de comportamento estão automatizados. | Sim — executados pelo Maven via JUnit Platform. |
+| A estrutura respeita a separação de responsabilidades. | Sim — ver arquitetura. |
+| A documentação permite que outro integrante execute o sistema. | Sim — README (terminal, NetBeans e IntelliJ). |
 
 ## 4. Observação
 
-A cobertura de testes deverá ser verificada por uma ferramenta apropriada. A meta de 80% representa um critério de qualidade do projeto, não um resultado já alcançado.
+Os percentuais acima foram obtidos executando `mvn clean verify` e lendo o relatório `target/site/jacoco/jacoco.csv`. Se o código for alterado, os valores devem ser medidos novamente.

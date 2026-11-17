@@ -1,0 +1,30 @@
+[ERRO município vazio] Dados inválidos :: O campo "Município" é obrigatório.
+[Cadastro propriedade] SMField :: Propriedade cadastrada com sucesso.
+[ERRO área negativa] Dados inválidos :: A área do talhão deve ser maior que zero.
+[Cadastro talhão] SMField :: Talhão cadastrado com sucesso.
+[ERRO letras em campo numérico] Dados inválidos :: O campo "Umidade do solo" deve conter apenas números (ex.: 12,5). Valor informado: "abc".
+[ERRO umidade 150] Dados inválidos :: O campo "Umidade do solo" deve estar entre 0 e 100 % (valor informado: 150).
+[ERRO indicador ausente] Dados inválidos :: Dados insuficientes: preencha os quatro indicadores para registrar e calcular o risco. Faltando: temperatura.
+[Registro 1 de indicadores] SMField :: Indicadores registrados. Índice de risco: 0 (BAIXO).
+Dashboard linhas: 1
+[Registro 2 de indicadores] SMField :: Indicadores registrados. Índice de risco: 68 (ALTO).
+Histórico linhas: 2 | Alertas: 2
+Após reabrir — dashboard linhas: 1 | primeira linha: 1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 11:13 | 
+[Confirmação carga demo] Dados de demonstração :: Carregar 3 propriedades, 6 talhões, indicadores e ocorrências FICTÍCIOS? Os registros são marcados como [SIMULADO] — uso acadêmico — e não representam condições reais.
+[Carga demo concluída] SMField :: Dados de demonstração carregados.
+Dashboard demo linhas: 7
+   4 | [SIMULADO] Sítio Santa Luzia | Talhão Café Encosta | Café | 8 | 90 | Alto | 17/11/2026 09:00 | 
+   1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 11:13 | 
+   5 | [SIMULADO] Sítio Santa Luzia | Talhão Milho Baixada | Milho | 10 | 63 | Médio | 17/11/2026 05:00 | 
+   3 | [SIMULADO] Fazenda Boa Vista | Talhão Soja Sul | Soja | 25,5 | 50 | Médio | 17/11/2026 06:00 | 
+   2 | [SIMULADO] Fazenda Boa Vista | Talhão Milho Norte | Milho | 12 | 0 | Baixo | 17/11/2026 08:00 | 
+   6 | [SIMULADO] Fazenda Serra Azul | Talhão Soja Platô | Soja | 30 | 0 | Baixo | 17/11/2026 07:00 | 
+   7 | [SIMULADO] Fazenda Serra Azul | Talhão Café Novo | Café | 6 | — | Não calculado | — | 
+Alertas demo: 6
+[Registro de ocorrência] SMField :: Ocorrência registrada com sucesso.
+Compatibilidade: 2 cultura(s) potencialmente compatível(is) segundo a base simulada.
+[Edição de talhão (área 14,5)] SMField :: Talhão alterado com sucesso.
+Talhão A após edição: área 14,5
+[Confirmação de exclusão (respondendo NÃO)] Confirmar exclusão :: Excluir o talhão "Talhão A"?  Também serão removidos 2 registro(s) de indicadores (histórico) e 0 ocorrência(s) vinculados a ele. Esta ação não pode ser desfeita.
+Talhões após cancelar exclusão: 7
+FIM OK

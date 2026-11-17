@@ -23,11 +23,18 @@
 hs_err_pid*
 replay_pid*
 
-# Maven / IDEs
+# Maven
 target/
+
+# Dados locais do SMField (gerados ao usar o programa)
+dados/
+
+# IDEs
 .idea/
 *.iml
 .vscode/
-.classpath
-.project
+nbproject/private/
+nbactions.xml
 .settings/
+.project
+.classpath
