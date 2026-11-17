@@ -2,41 +2,82 @@
 
 ## 1. Objetivo
 
-Este documento apresenta os requisitos funcionais do SMField, um sistema de monitoramento e análise de riscos agrícolas. O objetivo é definir as funcionalidades essenciais da primeira versão do sistema (MVP).
+Este documento apresenta os requisitos funcionais do SMField, um sistema de monitoramento e análise de riscos agrícolas, e o **status real de implementação** ao final da Sprint 2.
 
-## 2. Requisitos funcionais
+## 2. Requisitos funcionais do MVP
 
-| ID    | Requisito                        | Descrição                                                                                                         |
-| ----- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| RF-01 | Cadastrar propriedade            | O sistema deve permitir cadastrar uma propriedade rural com nome e município.                                     |
-| RF-02 | Cadastrar talhão                 | O sistema deve permitir cadastrar talhões vinculados a uma propriedade, informando nome, área e cultura.          |
-| RF-03 | Listar propriedades e talhões    | O sistema deve permitir visualizar as propriedades e os talhões cadastrados.                                      |
-| RF-04 | Registrar indicadores ambientais | O sistema deve permitir registrar umidade do solo, temperatura, umidade do ar e precipitação para um talhão.      |
-| RF-05 | Calcular índice de risco         | O sistema deve calcular um índice de risco agrícola entre 0 e 100 com base nos indicadores registrados.           |
-| RF-06 | Classificar nível de risco       | O sistema deve classificar o risco como baixo, médio ou alto.                                                     |
-| RF-07 | Exibir painel de riscos          | O sistema deve apresentar os talhões cadastrados e seus respectivos níveis de risco.                              |
-| RF-08 | Consultar dados e justificativa  | O sistema deve permitir consultar os indicadores registrados e os fatores considerados na classificação do risco. |
+| ID | Requisito | Descrição | Status | Classe responsável | Tela | Testes |
+|---|---|---|---|---|---|---|
+| RF-01 | Cadastrar propriedade | Cadastrar propriedade rural com identificador único, nome e município (obrigatórios, sem aceitar texto vazio ou só com espaços; sem duplicar nome + município). | Implementado | `Propriedade`, `PropriedadeService`, `PropriedadeRepository` | Propriedades | `PropriedadeTest`, `PropriedadeServiceTest`, `cadastro.feature` |
+| RF-02 | Cadastrar talhão | Cadastrar talhão vinculado a uma propriedade existente, com nome, área (> 0 ha) e cultura obrigatórios. | Implementado | `Talhao`, `TalhaoService`, `TalhaoRepository` | Talhões | `TalhaoTest`, `TalhaoServiceTest`, `cadastro.feature` |
+| RF-03 | Listar propriedades e talhões | Visualizar propriedades, selecionar uma e consultar nome, área e cultura de seus talhões; listas atualizadas após cadastros, alterações e exclusões; mensagens quando não há registros. | Implementado | `PropriedadeService`, `TalhaoService` | Propriedades, Talhões | `PropriedadeServiceTest`, `TalhaoServiceTest` |
+| RF-04 | Registrar indicadores ambientais | Registrar umidade do solo (%), temperatura (°C), umidade do ar (%), precipitação acumulada nas últimas 24 h (mm) e data/hora para um talhão. | Implementado | `IndicadorAmbiental`, `IndicadorService`, `ConversorEntrada`, `IndicadorRepository` | Indicadores ambientais | `IndicadorAmbientalTest`, `IndicadorServiceTest`, `ConversorEntradaTest`, `risco.feature` |
+| RF-05 | Calcular índice de risco | Índice de 0 a 100, determinístico, documentado e explicável (pesos e faixas na seção 4). | Implementado | `RiscoService` | Indicadores, Consulta de risco, Dashboard | `RiscoServiceTest`, `risco.feature` |
+| RF-06 | Classificar nível de risco | BAIXO (0–33), MÉDIO (34–66), ALTO (67–100); NÃO CALCULADO quando faltam dados. | Implementado | `NivelRisco`, `RiscoService` | Todas as telas de risco | `NivelRiscoTest`, `risco.feature` (esquema com 0, 33, 34, 66, 67 e 100) |
+| RF-07 | Exibir painel de riscos | Propriedade, talhão, cultura, último índice, classificação colorida e data da última atualização, ordenados do maior para o menor risco. | Implementado | `MonitoramentoService` | Dashboard | `MonitoramentoServiceTest`, `dashboard.feature` |
+| RF-08 | Consultar dados e justificativa | Indicadores, índice, classificação, data e justificativa baseada nos indicadores efetivamente fora da faixa. | Implementado | `MonitoramentoService`, `RiscoService` | Consulta de risco | `RiscoServiceTest`, `MonitoramentoServiceTest`, `risco.feature` |
 
-## 3. Regras de negócio
+## 3. Requisitos complementares (derivados da visão do produto)
 
-* **RN-01:** Todo talhão deve estar vinculado a uma propriedade cadastrada.
-* **RN-02:** O índice de risco deve estar entre 0 e 100.
-* **RN-03:** O risco será classificado como baixo (0 a 33), médio (34 a 66) ou alto (67 a 100).
-* **RN-04:** O sistema não deve aceitar valores inválidos para os indicadores ambientais.
-* **RN-05:** Quando não houver dados suficientes para o cálculo, o sistema deverá informar que o risco não pode ser calculado.
-* **RN-06:** A classificação deverá apresentar uma justificativa baseada nos indicadores utilizados.
+O documento `visao-do-produto.md` inclui no escopo do MVP itens que não constavam da tabela original. Eles foram tratados como requisitos complementares:
 
-## 4. Fora do escopo do MVP
+| ID | Requisito | Descrição | Status | Classe responsável | Tela | Testes |
+|---|---|---|---|---|---|---|
+| RF-09 | Editar e excluir talhões | Alterar nome, área e cultura; excluir com confirmação. Estratégia para registros vinculados: a tela informa quantos indicadores e ocorrências serão removidos e, se confirmado, a exclusão é feita em cascata. | Implementado | `TalhaoService` | Talhões | `TalhaoServiceTest` |
+| RF-10 | Registrar ocorrências de campo | Tipo (praga, doença, falta de irrigação, excesso de água, outra), descrição, data (não futura) e talhão; exibidas na consulta do talhão. Não alteram o índice numérico. | Implementado | `OcorrenciaCampo`, `OcorrenciaService` | Ocorrências, Consulta de risco | `OcorrenciaCampoTest`, `OcorrenciaServiceTest` |
+| RF-11 | Histórico de indicadores e riscos | Cada novo registro preserva os anteriores; tabela cronológica com índice, classificação e variação. | Implementado | `IndicadorService`, `MonitoramentoService`, `RegistroHistorico` | Histórico e alertas | `IndicadorServiceTest`, `MonitoramentoServiceTest`, `JsonRepositoryTest`, `dashboard.feature` |
+| RF-12 | Alertas internos | Risco alto, mudança de classificação no último registro e talhão sem indicadores, exibidos no próprio sistema. | Implementado | `MonitoramentoService`, `Alerta` | Histórico e alertas | `MonitoramentoServiceTest`, `dashboard.feature` |
 
-As seguintes funcionalidades poderão ser implementadas em versões futuras:
+### Requisitos entregues na Sprint 1 (alinhados ao pré-projeto)
+
+| ID | Requisito | Status | Classe | Interface | Testes |
+|---|---|---|---|---|---|
+| S1-01 | Recomendação de plantio: nota de 0 a 100 por mês e colheita estimada para uma cultura em uma região | Implementado (Sprint 1) | `smfield.Recomendador` | CLI `recomendar` | `RecomendadorTest` |
+| S1-02 | O que plantar agora: ranking de culturas para um mês na região | Implementado (Sprint 1) | `smfield.Recomendador` | CLI `agora` | `RecomendadorTest`, `MainTest` |
+| S1-03 | Calendário de colheita a partir da data de plantio | Implementado (Sprint 1) | `smfield.Calendario` | CLI `colheita` | `CalendarioTest` |
+| S1-04 | Listagem de culturas e regiões e validação dos dados | Implementado (Sprint 1) | `smfield.DadosLoader`, `smfield.Json` | CLI `listar` | `DadosTest`, `JsonTest` |
+
+Detalhes em `docs/sprint-1-cli-java.md`. Os dados da Sprint 1 são ilustrativos.
+
+### Módulo demonstrativo (ligação entre as sprints)
+
+| ID | Requisito | Status | Observação |
+|---|---|---|---|
+| RD-01 | Compatibilidade de culturas por município | Parcial (demonstrativo) | Compara as médias dos indicadores registrados nos talhões do município com uma base **SIMULADA** de faixas por cultura e informa quando há dados insuficientes (mínimo de 3 registros). Não considera pH, textura nem fertilidade do solo e não é recomendação agronômica. Classe: `CompatibilidadeService`; tela: Compatibilidade (demo); teste: `CompatibilidadeServiceTest`. |
+
+## 4. Regras de negócio
+
+| ID | Regra | Onde é garantida | Testes |
+|---|---|---|---|
+| RN-01 | Todo talhão deve estar vinculado a uma propriedade cadastrada. | `Talhao` (id > 0) e `TalhaoService.cadastrar` (propriedade existe) | `TalhaoTest`, `TalhaoServiceTest`, `cadastro.feature` |
+| RN-02 | O índice de risco deve estar entre 0 e 100. | `RiscoService` (aritmética inteira e limite) e `NivelRisco.classificar` | `RiscoServiceTest` (14.256 combinações de valores), `NivelRiscoTest` |
+| RN-03 | Baixo (0–33), médio (34–66), alto (67–100). | `NivelRisco.classificar` | `NivelRiscoTest`, `risco.feature` |
+| RN-04 | Valores inválidos não são aceitos nos indicadores. | `ConversorEntrada` (letras, NaN, infinito) e `IndicadorAmbiental` (faixas) | `IndicadorAmbientalTest`, `IndicadorServiceTest`, `ConversorEntradaTest`, `risco.feature` |
+| RN-05 | Sem dados suficientes, o risco não é calculado e o sistema informa claramente. | `IndicadorService.registrar` (exige os quatro) e `RiscoService` (`NAO_CALCULADO`) | `RiscoServiceTest`, `IndicadorServiceTest`, `risco.feature` |
+| RN-06 | Toda classificação calculada apresenta justificativa baseada nos fatores que contribuíram. | `RiscoService.justificar` | `RiscoServiceTest`, `risco.feature` |
+
+### Modelo de cálculo (RF-05)
+
+| Indicador | Peso | Penalidade 0 | Penalidade 50 | Penalidade 100 |
+|---|---|---|---|---|
+| Umidade do solo | 35% | 40–70% | 25–<40% ou >70–85% | <25% ou >85% |
+| Temperatura | 30% | 18–30 °C | 10–<18 °C ou >30–38 °C | <10 °C ou >38 °C |
+| Umidade do ar | 15% | 40–80% | 20–<40% ou >80–90% | <20% ou >90% |
+| Precipitação (últimas 24 h) | 20% | 5–30 mm | 0–<5 mm ou >30–100 mm | >100 mm |
+
+`risco = solo × 0,35 + temperatura × 0,30 + umidade do ar × 0,15 + precipitação × 0,20`, arredondado para o inteiro mais próximo (0,5 para cima).
+
+Faixas aceitas no registro: umidades 0–100%; temperatura −20 a 60 °C (faixa operacional); precipitação 0 a 500 mm.
+
+## 5. Fora do escopo do MVP
 
 * Integração com sensores e dispositivos IoT.
 * Consulta automática a serviços meteorológicos.
 * Inteligência artificial para previsão de riscos.
 * Envio de alertas por e-mail ou WhatsApp.
 * Exportação de relatórios.
-* Gráficos históricos e análise de tendências.
+* Gráficos históricos avançados e análise de tendências (o histórico é apresentado em tabela cronológica).
 
-## 5. Observação
+## 6. Observação
 
-Os limites de classificação e a fórmula de cálculo do risco são regras iniciais para fins acadêmicos. A fórmula deverá ser definida e testada antes da implementação, sem ser apresentada como uma recomendação agronômica validada.
+Os limites de classificação e a fórmula de cálculo do risco são regras acadêmicas, definidas e testadas para demonstrar a lógica do software. **Não representam recomendação agronômica validada** para todas as culturas.

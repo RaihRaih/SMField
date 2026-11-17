@@ -1,5 +1,7 @@
 # SMField — Sistema de Monitoramento Agrícola (Sprint 1 · MVP) — versão Java
 
+> **Atualização da Sprint 2:** este módulo continua no projeto, no pacote `smfield`, ao lado do sistema de monitoramento de riscos (pacotes `domain`, `service`, `infra` e `ui`). O build agora é único: `mvn clean verify` compila e testa as duas sprints e gera `target/smfield.jar`, cuja classe principal é a interface gráfica da Sprint 2. Para usar a linha de comando da Sprint 1, rode `java -cp target/smfield.jar smfield.Main <comando>`, conforme os exemplos abaixo.
+
 Ajuda o agricultor a descobrir **quando plantar e colher** cada cultura na sua região.
 Esta é a versão em **Java** do MVP originalmente feito em Python, com as mesmas funcionalidades,
 as mesmas regras de cálculo, os mesmos dados e os mesmos testes.
@@ -13,22 +15,22 @@ as mesmas regras de cálculo, os mesmos dados e os mesmos testes.
 | + | Lista as culturas e regiões disponíveis | `listar` |
 
 ## Requisitos
-- **JDK 17 ou superior** (`java -version`)
+- **JDK 21** (`java -version`) — exigido pelo projeto integrado da Sprint 2 (o código da Sprint 1 também roda em Java 17)
 - **Maven 3.8+** (`mvn -version`) — só para compilar e rodar os testes pelo Maven
 - Nenhuma biblioteca externa em tempo de execução (o único artefato baixado é o JUnit 5, usado nos testes)
 
 ## Compilar, testar e empacotar
 ```bash
-mvn clean test       # compila e roda os testes (JUnit 5)
-mvn clean package    # gera target/smfield-0.1.0.jar
+mvn clean test       # compila e roda os testes (JUnit 5) das duas sprints
+mvn clean verify     # testes + cobertura + gera target/smfield.jar
 ```
 
 ## Como usar
 ```bash
-java -jar target/smfield-0.1.0.jar listar
-java -jar target/smfield-0.1.0.jar recomendar --cultura soja --regiao "Passo Fundo" --ano 2026
-java -jar target/smfield-0.1.0.jar agora --regiao "Belo Horizonte" --mes 10
-java -jar target/smfield-0.1.0.jar colheita --cultura milho --plantio 2026-10-20
+java -cp target/smfield.jar smfield.Main listar
+java -cp target/smfield.jar smfield.Main recomendar --cultura soja --regiao "Passo Fundo" --ano 2026
+java -cp target/smfield.jar smfield.Main agora --regiao "Belo Horizonte" --mes 10
+java -cp target/smfield.jar smfield.Main colheita --cultura milho --plantio 2026-10-20
 ```
 Também funciona `--opcao=valor` (ex.: `--mes=10`). Nomes ignoram acento e maiúsculas/minúsculas
 (`feijao` = `Feijão`). Sem `--ano`, usa o ano atual; sem `--mes`, usa o mês atual.
