@@ -9,11 +9,11 @@ Este documento define os requisitos de qualidade, organização e desenvolviment
 | ID | Requisito | Descrição | Status | Evidência |
 |---|---|---|---|---|
 | RNF-01 | Tecnologia | Java e Maven. | Atendido | `pom.xml` (Java 21, `maven.compiler.release` = 21); `mvn clean verify` executado com sucesso. |
-| RNF-02 | Organização do código | Camadas `domain`, `service`, `infra` e `ui`. | Atendido | `src/main/java/{domain,service,infra,ui}` — 45 tipos Java; ver `docs/arquitetura/arquitetura-inicial.md`. |
+| RNF-02 | Organização do código | Camadas `domain`, `service`, `infra` e `ui`. | Atendido (Sprint 2) | `src/main/java/{domain,service,infra,ui}` — 45 tipos Java. O módulo da Sprint 1 permanece no pacote `smfield`, fora das quatro camadas; ver `docs/arquitetura/arquitetura-inicial.md`. |
 | RNF-03 | Separação de responsabilidades | Regras de negócio separadas da interface. | Atendido | Cálculo, classificação e validações ficam em `domain`/`service`; o pacote `ui` apenas chama serviços e exibe resultados. |
-| RNF-04 | Testes unitários | Principais regras com testes JUnit. | Atendido | 83 métodos de teste JUnit 5 (9 parametrizados), totalizando 133 execuções, 0 falhas. |
+| RNF-04 | Testes unitários | Principais regras com testes JUnit. | Atendido | Sprint 2: 83 métodos de teste JUnit 5 (9 parametrizados), totalizando 133 execuções. Sprint 1: 23 testes. 0 falhas. |
 | RNF-05 | Testes de comportamento | Pelo menos cinco cenários Cucumber/Gherkin automatizados. | Atendido | 3 arquivos `.feature`, 15 cenários executados (9 cenários + 6 exemplos de esquema), 77 passos, todos aprovados no `mvn verify`. |
-| RNF-06 | Cobertura de testes | Buscar 80% nas classes de serviço e regras de negócio, com ferramenta de medição. | Atendido (medido) | JaCoCo: `service` 99,2% e `domain` 98,9% de linhas; regra `check` no `pom.xml` falha o build abaixo de 80%. Total do projeto: 36,5% (a interface Swing não possui testes automatizados). |
+| RNF-06 | Cobertura de testes | Buscar 80% nas classes de serviço e regras de negócio, com ferramenta de medição. | Atendido (medido) | JaCoCo: `service` 99,2% e `domain` 98,9% de linhas; regra `check` no `pom.xml` falha o build abaixo de 80%. Total do projeto: 44,0% (a interface Swing não possui testes automatizados; o pacote `smfield` da Sprint 1 tem 76,9%). |
 | RNF-07 | Validação de dados | Validar entradas e impedir valores inválidos. | Atendido | Campos obrigatórios, faixas, letras, NaN, infinito, datas inválidas/futuras, duplicidades e talhão/propriedade inexistentes são rejeitados com mensagens claras (telas 02, 04, 06, 07 e 08 em `docs/evidencias/telas`). |
 | RNF-08 | Versionamento e documentação | Código e documentação no GitHub, com instruções no README. | Atendido localmente | README com instruções de execução, testes e cobertura; histórico Git organizado em commits. A publicação no GitHub depende do `git push` da equipe (comandos no relatório). |
 

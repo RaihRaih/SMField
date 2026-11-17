@@ -58,7 +58,7 @@
 - Cada indicador: 0, 50 ou 100 pontos conforme a faixa
 - Baixo 0–33 · Médio 34–66 · Alto 67–100 · Sem dados = Não calculado
 
-**Elemento visual:** fluxograma com cinco caixas e a fórmula abaixo.
+**Elemento visual:** fluxograma com cinco caixas e a fórmula abaixo. Opcional: uma faixa "Sprint 1: quando plantar na região → Sprint 2: como está cada talhão".
 
 **Fala sugerida (≈40 s)**
 "O cálculo é determinístico e explicável. Cada indicador ganha 0, 50 ou 100 pontos conforme está dentro, perto ou longe da faixa de referência, e entra na média com seu peso. Por exemplo: solo a 22%, temperatura de 36 graus, umidade do ar 35% e nenhuma chuva somam 68 pontos — risco alto. E se faltar um indicador, o sistema não inventa: mostra 'não calculado'. Importante: as faixas são hipóteses acadêmicas para demonstrar a lógica, não recomendações agronômicas."
@@ -81,14 +81,14 @@
 
 **Texto do slide**
 - Arquitetura em 4 camadas: domain · service · infra · ui
-- 148 testes automatizados aprovados (JUnit 5 + 15 cenários Cucumber em português)
+- 171 testes automatizados aprovados (JUnit 5 das duas sprints + 15 cenários Cucumber em português)
 - Cobertura medida com JaCoCo: 99,2% em service e 98,9% em domain
 - Build único: `mvn clean verify`
 
 **Elemento visual:** diagrama das camadas + print do relatório JaCoCo (`target/site/jacoco/index.html`) + trecho de um `.feature`.
 
 **Fala sugerida (≈35 s)**
-"Por trás da interface, separamos o sistema em quatro camadas: a interface não faz cálculo nenhum, só chama os serviços. Isso permitiu testar as regras de verdade: são 148 testes automatizados, todos passando, incluindo 15 cenários de comportamento escritos em português com Cucumber. A cobertura das regras de negócio passa de 98%, e o próprio build falha se ela cair abaixo de 80%. A interface não tem testes automatizados; validamos o roteiro completo nela com capturas de tela."
+"Por trás da interface, separamos o sistema em quatro camadas: a interface não faz cálculo nenhum, só chama os serviços. Isso permitiu testar as regras de verdade: são 171 testes automatizados, todos passando, somando as duas sprints, incluindo 15 cenários de comportamento escritos em português com Cucumber. A cobertura das regras de negócio passa de 98%, e o próprio build falha se ela cair abaixo de 80%. A interface não tem testes automatizados; validamos o roteiro completo nela com capturas de tela."
 
 ---
 
@@ -128,6 +128,7 @@
 | 8 | Aba **6. Histórico e alertas**. | "As duas medições estão preservadas, e o sistema avisou a mudança de baixo para alto." |
 | 9 | Fechar e abrir novamente o programa; ir ao **Dashboard**. | "Os dados continuam lá: ficam gravados em arquivos locais." |
 | 10 | Menu **Arquivo > Carregar dados de demonstração** e voltar ao Dashboard. | "Com dados simulados vemos vários talhões ordenados do maior para o menor risco." |
+| 11 (opcional) | No terminal: `java -cp target/smfield.jar smfield.Main agora --regiao "Belo Horizonte" --mes 10` | "E este é o recomendador da Sprint 1: ele sugere o que plantar em cada região e mês. Continua funcionando no mesmo projeto." |
 
 **Valores fictícios:** os números usados para "Contagem" e os dados [SIMULADO] servem apenas para demonstração e não representam condições reais.
 

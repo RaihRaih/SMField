@@ -27,7 +27,7 @@ replay_pid*
 target/
 
 # Dados locais do SMField (gerados ao usar o programa)
-dados/
+/dados/
 
 # IDEs
 .idea/

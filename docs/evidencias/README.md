@@ -9,6 +9,8 @@ Comando: `mvn clean verify` (Java 21, Maven 3.9.11)
 - JaCoCo: `All coverage checks have been met.` — linhas: `service` 99,2%, `domain` 98,9%, `infra` 94,9%, `ui` 0%, total 36,5%
 - `BUILD SUCCESS`; executável gerado em `target/smfield.jar`
 
+Após restaurar o módulo da Sprint 1 (pacote `smfield`), o build completo passou a executar **171 testes** (148 da Sprint 2 + 23 da Sprint 1), com 0 falhas, e a cobertura total ficou em 44,0% de linhas. Os pacotes `service` e `domain` mantiveram os percentuais acima. A linha de comando da Sprint 1 foi verificada com `java -cp target/smfield.jar smfield.Main listar` e `... agora --regiao "Belo Horizonte" --mes 10`.
+
 Os relatórios são gerados a cada build em `target/surefire-reports/`, `target/cucumber-report.html` e `target/site/jacoco/index.html` (a pasta `target/` não é versionada).
 
 ## 2. Roteiro de teste manual na interface

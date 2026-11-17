@@ -28,6 +28,7 @@ Apoiar produtores e gestores agrícolas na identificação e priorização de ta
 | RF-11* | Histórico de indicadores e riscos (registros anteriores preservados) | Aba **6. Histórico e alertas** |
 | RF-12* | Alertas internos (risco alto, mudança de classificação, talhão sem indicadores) | Aba **6. Histórico e alertas** |
 | Extra (P3) | Compatibilidade de culturas por município — **módulo demonstrativo com base simulada** | Aba **Compatibilidade (demo)** |
+| Sprint 1 | Recomendação de plantio, "o que plantar agora" e calendário de colheita por região (linha de comando) | `java -cp target/smfield.jar smfield.Main listar` — ver `docs/sprint-1-cli-java.md` |
 
 \* Requisitos complementares derivados da visão do produto (`docs/requisitos/visao-do-produto.md`).
 
@@ -73,7 +74,14 @@ O `mvn clean verify` compila, executa todos os testes (JUnit + Cucumber), gera o
 
 ## 7. Como executar o programa
 
-**Pelo terminal (na pasta do projeto):**
+**Linha de comando da Sprint 1 (recomendação de plantio por região):**
+
+```bash
+java -cp target/smfield.jar smfield.Main listar
+java -cp target/smfield.jar smfield.Main agora --regiao "Belo Horizonte" --mes 10
+```
+
+**Interface gráfica — pelo terminal (na pasta do projeto):**
 
 ```bash
 mvn compile exec:java
@@ -101,7 +109,10 @@ java -jar target/smfield.jar
 mvn test
 ```
 
-Resultado medido nesta entrega (`mvn clean verify`): **148 testes executados, 0 falhas, 0 erros** — 133 execuções JUnit (83 métodos de teste, sendo 9 parametrizados) e **15 cenários Cucumber / 77 passos**.
+Resultado medido (`mvn clean verify`): **171 testes executados, 0 falhas, 0 erros**:
+
+- Sprint 2: 133 execuções JUnit (83 métodos de teste, sendo 9 parametrizados) e **15 cenários Cucumber / 77 passos**;
+- Sprint 1: 23 testes JUnit (pacote `smfield`).
 
 Relatórios gerados:
 
@@ -119,8 +130,10 @@ Cobertura medida nesta entrega (linhas):
 | `service` | 99,2% | 94,8% |
 | `domain` | 98,9% | 95,3% |
 | `infra` | 94,9% | 86,2% |
+| `smfield` (Sprint 1) | 76,9% | 71,5% |
+| `smfield.domain` (Sprint 1) | 0% | 0% |
 | `ui` | 0% (interface Swing não tem testes automatizados no build) | 0% |
-| **Total do projeto** | 36,5% | 48,1% |
+| **Total do projeto** | 44,0% | 55,1% |
 
 A regra do JaCoCo no `pom.xml` exige no mínimo **80% de linhas** nos pacotes `service` e `domain` (RNF-06). A interface foi validada por um roteiro executado clicando nos componentes reais (ver `docs/evidencias/`).
 
@@ -133,7 +146,9 @@ SMField/
 │   ├── domain/   entidades e regras invariantes (Propriedade, Talhao, IndicadorAmbiental, NivelRisco, ResultadoRisco...)
 │   ├── service/  regras de negócio (cadastros, motor de risco, monitoramento, alertas, demonstração)
 │   ├── infra/    persistência JSON (JsonRepository e repositórios por entidade)
-│   └── ui/       interface Swing (AppMain, MainFrame e painéis)
+│   ├── ui/       interface Swing (AppMain, MainFrame e painéis)
+│   └── smfield/  Sprint 1: recomendador de plantio por região (linha de comando)
+├── src/main/resources/dados/   Sprint 1: culturas.json e regioes.json (valores ilustrativos)
 ├── src/test/java/          testes JUnit (domain, service, infra) e passos Cucumber (bdd)
 ├── src/test/resources/features/   cenários Gherkin (.feature)
 └── docs/                   requisitos, arquitetura, relatório, pitch e evidências
@@ -175,6 +190,7 @@ Faixas aceitas no registro: umidades 0–100%, temperatura −20 a 60 °C, preci
 - **As faixas de referência são hipóteses acadêmicas** para demonstrar a lógica do software. Elas **não são limites agronômicos validados** e não diferenciam culturas, fases de desenvolvimento ou tipos de solo. Esse aviso também aparece na interface.
 - Os dados são informados manualmente (ou simulados); não há integração com sensores, estações meteorológicas ou APIs climáticas.
 - As ocorrências de campo são informativas e não alteram o índice numérico.
+- O recomendador da Sprint 1 usa dados climáticos e de culturas **ilustrativos** (3 regiões, 6 culturas), que precisam ser substituídos por fontes oficiais (INMET, ZARC/Embrapa) antes de uso real.
 - O módulo de compatibilidade de culturas usa uma **base de requisitos simulada** e só considera os indicadores registrados (temperatura, umidades e precipitação); pH, textura e fertilidade do solo não fazem parte desta versão.
 - A persistência em JSON é adequada para uso local por um usuário; não há controle de acesso nem uso simultâneo por várias pessoas.
 
@@ -191,6 +207,7 @@ Conforme a documentação original do repositório:
 - Requisitos não funcionais: `docs/requisitos/requisitos_nao_funcionais.md`
 - Visão do produto: `docs/requisitos/visao-do-produto.md`
 - Arquitetura: `docs/arquitetura/arquitetura-inicial.md`
+- Sprint 1 (recomendador por região): `docs/sprint-1-cli-java.md`
 - Relatório da Sprint 2: `docs/relatorio-sprint-2.md`
 - Pitch: `docs/pitch-smfield.md`
 - Evidências (telas e roteiro de teste): `docs/evidencias/`

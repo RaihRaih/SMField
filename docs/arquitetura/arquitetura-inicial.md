@@ -81,6 +81,19 @@ Não há dependências circulares: `domain` não conhece nenhuma outra camada e 
 
 `AppMain`, `MainFrame`, `DashboardPanel`, `PropriedadePanel`, `TalhaoPanel`, `IndicadoresPanel`, `DetalhesRiscoPanel`, `OcorrenciasPanel`, `HistoricoAlertasPanel`, `CompatibilidadePanel`, `ResultadoRiscoView`, `Estilo` (paleta e utilitários visuais) e `Atualizavel` (contrato de recarga das telas).
 
+### Módulo da Sprint 1 — pacote `smfield`
+
+O recomendador de plantio por região, entregue na Sprint 1, foi mantido sem alterações:
+
+- `Main` — linha de comando (`listar`, `recomendar`, `agora`, `colheita`);
+- `Recomendador` — nota de 0 a 100 por mês de plantio;
+- `Calendario` — colheita estimada;
+- `DadosLoader` e `Json` — leitura de `src/main/resources/dados/*.json`;
+- `Cultura`, `ClimaMes`, `Regiao`, `Janela` e `Sugestao` — records do modelo;
+- `smfield.domain.Propriedade` — classe da Sprint 1.
+
+Ele é independente das quatro camadas da Sprint 2: não usa nem é usado por `domain`, `service`, `infra` ou `ui`. Também é executado por linha de comando (`java -cp target/smfield.jar smfield.Main ...`). Integrá-lo às camadas, por exemplo como um serviço consumido pela interface, é uma evolução possível.
+
 ## 4. Fluxo dos dados
 
 1. O usuário preenche um formulário na `ui`.

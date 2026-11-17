@@ -44,7 +44,9 @@ O código está organizado em quatro camadas (pacotes Java):
 - **`infra`** — persistência: `JsonRepository<T>` genérico e repositórios por entidade, gravando arquivos JSON na pasta `dados/`.
 - **`ui`** — interface Swing: janela principal com abas e painéis que apenas chamam os serviços e exibem os resultados.
 
-A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema possui **45 tipos Java autorais** (15 em `domain`, 10 em `service`, 7 em `infra` e 13 em `ui`). Detalhes em `docs/arquitetura/arquitetura-inicial.md`.
+A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema da Sprint 2 possui **45 tipos Java autorais** (15 em `domain`, 10 em `service`, 7 em `infra` e 13 em `ui`).
+
+O módulo da Sprint 1 (recomendador de plantio por região, linha de comando) foi mantido sem alterações no pacote `smfield`, com seus dados em `src/main/resources/dados/`. Ele compartilha o mesmo `pom.xml` e o mesmo build. Detalhes em `docs/arquitetura/arquitetura-inicial.md`.
 
 ## 5. Funcionalidades desenvolvidas
 
@@ -63,21 +65,25 @@ A interface não contém cálculo de risco nem regras de validação: tudo isso 
 | RF-11 Histórico | `IndicadorService`, `MonitoramentoService`, `RegistroHistorico` | Histórico e alertas |
 | RF-12 Alertas internos | `MonitoramentoService`, `Alerta`, `TipoAlerta` | Histórico e alertas |
 | Demonstrativo: compatibilidade de culturas | `CompatibilidadeService`, `RequisitoCultura` | Compatibilidade (demo) |
+| Sprint 1: recomendação de plantio, "o que plantar agora" e calendário de colheita | `smfield.Recomendador`, `smfield.Calendario`, `smfield.DadosLoader`, `smfield.Main` | Linha de comando |
 
 ## 6. Sprint 1 — Base funcional
 
-O repositório recebido no início desta etapa continha a documentação (visão do produto, requisitos e arquitetura inicial) e **uma única classe Java**, `Propriedade`, com dois problemas estruturais: estava em `scr/main/java/src/main/java/domain/` (fora do padrão Maven) e declarava o pacote `src.main.java.domain`. Não havia `pom.xml`, testes, persistência nem interface.
+A Sprint 1 está na branch `dev` do repositório e foi preservada integralmente nesta entrega:
 
-Os itens da base funcional prevista para a Sprint 1 foram consolidados nesta entrega:
+- **Documentação inicial:** visão do produto, requisitos funcionais e não funcionais e arquitetura inicial.
+- **MVP em Java/Maven (linha de comando), pacote `smfield`:** ajuda o agricultor a decidir quando plantar e colher em uma região, alinhado à proposta do pré-projeto:
+  - recomendação de plantio com nota de 0 a 100 para cada mês e colheita estimada (`recomendar`);
+  - ranking do que plantar em um mês na região (`agora`);
+  - calendário de colheita a partir da data de plantio (`colheita`);
+  - listagem de culturas e regiões (`listar`).
+- **Dados ilustrativos** em `culturas.json` e `regioes.json` (6 culturas e 3 regiões).
+- **23 testes JUnit 5.**
+- A classe `smfield.domain.Propriedade`, ponto de partida do cadastro de propriedades.
 
-- criação do `pom.xml` e da estrutura `src/main/java` / `src/test/java`;
-- correção da classe `Propriedade` (pacote `domain`), mantendo nome e município e acrescentando identificador e validações;
-- organização das quatro camadas;
-- cadastro de propriedades (RF-01), de talhões (RF-02) e listagem (RF-03);
-- persistência em JSON;
-- testes das funcionalidades básicas.
+Documentação completa: `docs/sprint-1-cli-java.md`.
 
-> Observação de transparência: o pacote analisado (ZIP do repositório) não incluía o histórico Git nem outro código além da classe `Propriedade`. Este relatório não afirma que esses itens existiam anteriormente nesse pacote.
+**Integração com a Sprint 2.** A Sprint 2 corrigiu a estrutura Maven (o pacote de trabalho tinha o código em `scr/main/java/src/main/java/domain`, com o pacote `src.main.java.domain`) e organizou o sistema de monitoramento de riscos nas quatro camadas exigidas. O módulo da Sprint 1 continua no pacote `smfield`, sem alterações de código, e é compilado e testado pelo mesmo `mvn clean verify`. Como o `.jar` passou a abrir a interface gráfica, a linha de comando da Sprint 1 é executada com `java -cp target/smfield.jar smfield.Main <comando>`.
 
 ## 7. Sprint 2
 
@@ -126,6 +132,8 @@ Os itens da base funcional prevista para a Sprint 1 foram consolidados nesta ent
 | Alerta de risco alto repetia o texto "Risco alto (índice X)" duas vezes | Mensagem passou a usar só a justificativa |
 | Aviso do Swing ("row index is bigger than sorter's row count") ao atualizar a tabela de talhões | Ordenador da tabela recriado após recarregar as linhas; aviso não ocorre mais no roteiro |
 | Selo do índice esticado e colunas truncadas em algumas telas | Ajustes de layout identificados pelas capturas de tela |
+| O pacote de trabalho não continha o código da Sprint 1, e o primeiro envio da branch `sprint-2` o removia | Código, dados, testes e documentação da Sprint 1 restaurados a partir da branch `dev` e integrados ao build |
+| A versão 2.22.3 do `maven-surefire-plugin` não existe no Maven Central | Atualizado para a versão 3.2.5 |
 
 ## 8. Regras de negócio
 
@@ -156,15 +164,16 @@ Comando executado: `mvn clean verify`
 
 | Item | Resultado real |
 |---|---|
-| Métodos de teste JUnit 5 | 83 (74 `@Test` e 9 `@ParameterizedTest`) |
-| Execuções JUnit (contando parâmetros) | 133 |
+| Métodos de teste JUnit 5 — Sprint 2 | 83 (74 `@Test` e 9 `@ParameterizedTest`), 133 execuções |
+| Testes JUnit 5 — Sprint 1 (preservados) | 23 |
 | Cenários Cucumber executados | 15 (9 cenários + 6 exemplos de esquema), 77 passos |
-| Total de testes no Surefire | **148 executados, 0 falhas, 0 erros, 0 ignorados** |
+| Total de testes no Surefire | **171 executados, 0 falhas, 0 erros, 0 ignorados** |
 | Cobertura de linhas `service` | 99,2% (ramos 94,8%) |
 | Cobertura de linhas `domain` | 98,9% (ramos 95,3%) |
 | Cobertura de linhas `infra` | 94,9% (ramos 86,2%) |
 | Cobertura de linhas `ui` | 0% — sem testes automatizados de interface |
-| Cobertura total do projeto | 36,5% de linhas |
+| Cobertura de linhas `smfield` (Sprint 1) | 76,9% (`smfield.domain`: 0%) |
+| Cobertura total do projeto | 44,0% de linhas |
 | Verificação JaCoCo (≥ 80% em `service` e `domain`) | Aprovada ("All coverage checks have been met") |
 
 **Cenários BDD** (`src/test/resources/features`): cadastro de propriedade; cadastro de talhão vinculado; talhão sem propriedade rejeitado; risco baixo; risco alto; dados insuficientes; indicador inválido; classificação nos limites 0, 33, 34, 66, 67 e 100; dashboard com riscos diferentes e alertas; histórico preservado após fechar e reabrir.
@@ -190,9 +199,10 @@ Funcionalidades comprovadamente operacionais (testes automatizados + roteiro na 
 ## 11. Limitações
 
 - **Modelo de risco acadêmico:** faixas e pesos são hipóteses para demonstrar a lógica do software. Não são limites agronômicos validados e não variam por cultura, fase da lavoura ou tipo de solo.
+- **Dados da Sprint 1 ilustrativos:** as normais climatológicas e os parâmetros das culturas do recomendador são aproximados e devem ser substituídos por dados do INMET e do ZARC/Embrapa antes de uso real.
 - **Dados manuais ou simulados:** não há sensores, estações meteorológicas nem APIs. Os dados de demonstração são fictícios (municípios fictícios, prefixo [SIMULADO]) e não representam condições reais. Os valores usados no roteiro com "Contagem" também são fictícios.
 - **Ocorrências** não alteram o índice numérico nesta versão.
-- **Divergência com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre clima/solo de uma região e os requisitos de culturas; os requisitos do repositório tratam do monitoramento de riscos por talhão. A prioridade foi o monitoramento de riscos. Para manter a conexão com a proposta original, foi implementado um **módulo demonstrativo** que compara as médias dos indicadores registrados em um município com uma **base simulada** de requisitos por cultura. Ele é parcial: não usa dados climáticos históricos nem características de solo como pH, textura e fertilidade, e não deve ser apresentado como recomendação agronômica.
+- **Relação com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre o clima de uma região e os requisitos das culturas. Essa proposta foi atendida na **Sprint 1** pelo recomendador de plantio por região. A **Sprint 2** seguiu os requisitos do repositório e implementou o monitoramento de riscos por talhão. O módulo "Compatibilidade (demo)" da interface faz uma ligação simples entre as duas sprints: compara as médias dos indicadores registrados nos talhões de um município com uma **base simulada** de requisitos por cultura. Nenhuma das duas sprints considera características de solo como pH, textura e fertilidade, e nenhuma deve ser apresentada como recomendação agronômica.
 - **Interface** sem testes automatizados no build (validada pelo roteiro com capturas de tela).
 - **Persistência JSON** pensada para uso local por um usuário.
 
@@ -210,7 +220,7 @@ Possibilidades não implementadas nesta versão:
 
 ## 13. Conclusão
 
-O SMField entrega um MVP funcional que cobre os oito requisitos funcionais do repositório e os quatro complementares da visão do produto, com arquitetura em camadas, persistência local, 148 testes automatizados aprovados e cobertura acima da meta nas camadas de regras de negócio. O cálculo é transparente: o usuário vê não apenas o nível de risco, mas também por que ele foi atribuído — o que torna o painel útil para decidir quais talhões visitar primeiro.
+O SMField chega ao fim da Sprint 2 com duas frentes integradas no mesmo projeto: o recomendador de plantio por região da Sprint 1 e o monitoramento de riscos por talhão da Sprint 2. Este cobre os oito requisitos funcionais do repositório e os quatro complementares da visão do produto, com arquitetura em camadas e persistência local. O projeto tem 171 testes automatizados aprovados e cobertura acima da meta nas camadas de regras de negócio. O cálculo é transparente: o usuário vê não apenas o nível de risco, mas também por que ele foi atribuído — o que torna o painel útil para decidir quais talhões visitar primeiro.
 
 Para a equipe, o projeto consolidou práticas de qualidade de software: requisitos rastreáveis até classes e testes, regras de negócio isoladas da interface, cenários BDD legíveis, medição real de cobertura e documentação honesta das limitações.
 
@@ -218,12 +228,4 @@ Para a equipe, o projeto consolidou práticas de qualidade de software: requisit
 
 ### Anexo — publicação no GitHub
 
-O pacote recebido não continha a pasta `.git`; o histórico desta entrega foi criado localmente em commits organizados. Para publicar sem sobrescrever o repositório remoto, sugere-se enviar para uma branch nova e abrir um Pull Request:
-
-```bash
-git remote add origin https://github.com/RaihRaih/SMField.git
-git fetch origin
-git push -u origin sprint-2
-```
-
-Como o histórico local não compartilha commits com o remoto, a integração na branch desejada deve ser feita pela equipe (Pull Request ou merge com `--allow-unrelated-histories`), revisando os conflitos.
+A Sprint 2 foi publicada na branch `sprint-2`, criada a partir da `dev`, para integração por Pull Request (`sprint-2` → `dev`), preservando o histórico da Sprint 1.

@@ -28,7 +28,18 @@ O documento `visao-do-produto.md` inclui no escopo do MVP itens que não constav
 | RF-11 | Histórico de indicadores e riscos | Cada novo registro preserva os anteriores; tabela cronológica com índice, classificação e variação. | Implementado | `IndicadorService`, `MonitoramentoService`, `RegistroHistorico` | Histórico e alertas | `IndicadorServiceTest`, `MonitoramentoServiceTest`, `JsonRepositoryTest`, `dashboard.feature` |
 | RF-12 | Alertas internos | Risco alto, mudança de classificação no último registro e talhão sem indicadores, exibidos no próprio sistema. | Implementado | `MonitoramentoService`, `Alerta` | Histórico e alertas | `MonitoramentoServiceTest`, `dashboard.feature` |
 
-### Módulo demonstrativo (alinhamento ao pré-projeto)
+### Requisitos entregues na Sprint 1 (alinhados ao pré-projeto)
+
+| ID | Requisito | Status | Classe | Interface | Testes |
+|---|---|---|---|---|---|
+| S1-01 | Recomendação de plantio: nota de 0 a 100 por mês e colheita estimada para uma cultura em uma região | Implementado (Sprint 1) | `smfield.Recomendador` | CLI `recomendar` | `RecomendadorTest` |
+| S1-02 | O que plantar agora: ranking de culturas para um mês na região | Implementado (Sprint 1) | `smfield.Recomendador` | CLI `agora` | `RecomendadorTest`, `MainTest` |
+| S1-03 | Calendário de colheita a partir da data de plantio | Implementado (Sprint 1) | `smfield.Calendario` | CLI `colheita` | `CalendarioTest` |
+| S1-04 | Listagem de culturas e regiões e validação dos dados | Implementado (Sprint 1) | `smfield.DadosLoader`, `smfield.Json` | CLI `listar` | `DadosTest`, `JsonTest` |
+
+Detalhes em `docs/sprint-1-cli-java.md`. Os dados da Sprint 1 são ilustrativos.
+
+### Módulo demonstrativo (ligação entre as sprints)
 
 | ID | Requisito | Status | Observação |
 |---|---|---|---|
