@@ -29,6 +29,7 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
     private final JLabel infoCultura = new JLabel("—");
     private final JLabel infoData = new JLabel("—");
     private final JLabel infoRegistros = new JLabel("—");
+    private final JLabel infoFonte = new JLabel("—");
     private final ResultadoRiscoView resultado = new ResultadoRiscoView();
     private final DefaultTableModel modeloFatores = Estilo.modelo("Indicador", "Valor medido", "Faixa de referência",
             "Situação", "Penalidade", "Peso", "Pontos no índice");
@@ -54,7 +55,7 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
         topo.add(selecao, BorderLayout.CENTER);
         add(topo, BorderLayout.NORTH);
 
-        JPanel info = new JPanel(new GridLayout(4, 2, 4, 2));
+        JPanel info = new JPanel(new GridLayout(5, 2, 4, 2));
         info.setBorder(Estilo.secao("Talhão"));
         info.add(new JLabel("Propriedade:"));
         info.add(infoPropriedade);
@@ -64,6 +65,8 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
         info.add(infoData);
         info.add(new JLabel("Registros no histórico:"));
         info.add(infoRegistros);
+        info.add(new JLabel("Fonte dos dados:"));
+        info.add(infoFonte);
 
         JPanel painelResultado = new JPanel(new BorderLayout(4, 4));
         painelResultado.setBorder(Estilo.secao("Índice, classificação e justificativa"));
@@ -79,7 +82,8 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
         for (int i = 0; i < larguras.length; i++) {
             tabelaFatores.getColumnModel().getColumn(i).setPreferredWidth(larguras[i]);
         }
-        tabelaOcorrencias.getColumnModel().getColumn(0).setMaxWidth(110);
+        tabelaOcorrencias.getColumnModel().getColumn(0).setMinWidth(100);
+        tabelaOcorrencias.getColumnModel().getColumn(0).setMaxWidth(120);
         tabelaOcorrencias.getColumnModel().getColumn(1).setPreferredWidth(160);
         tabelaOcorrencias.getColumnModel().getColumn(2).setPreferredWidth(700);
         JPanel fatores = new JPanel(new BorderLayout());
@@ -116,6 +120,8 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
             infoCultura.setText("—");
             infoData.setText("—");
             infoRegistros.setText("—");
+            infoFonte.setText("—");
+            infoFonte.setToolTipText(null);
             resultado.limpar(comboTalhao.getItemCount() == 0
                     ? "Nenhum talhão cadastrado." : "Selecione um talhão.");
             avisoOcorrencias.setText(" ");
@@ -128,6 +134,8 @@ public class DetalhesRiscoPanel extends JPanel implements Atualizavel {
         IndicadorAmbiental ult = d.ultimoRegistro();
         infoData.setText(ult == null ? "sem registros" : Estilo.formatar(ult.getDataHora()));
         infoRegistros.setText(String.valueOf(d.totalRegistros()));
+        infoFonte.setText(ult == null ? "—" : ult.isDadoInmet() ? "INMET (real) + solo simulado" : ult.getFonte());
+        infoFonte.setToolTipText(ult == null ? null : ult.getFonte());
         resultado.mostrar(d.resultado());
         for (FatorRisco f : d.resultado().getFatores()) {
             modeloFatores.addRow(new Object[]{f.indicador(), Estilo.numero(f.valor()) + " " + f.unidade(),

@@ -28,6 +28,8 @@ O documento `visao-do-produto.md` inclui no escopo do MVP itens que não constav
 | RF-11 | Histórico de indicadores e riscos | Cada novo registro preserva os anteriores; tabela cronológica com índice, classificação e variação. | Implementado | `IndicadorService`, `MonitoramentoService`, `RegistroHistorico` | Histórico e alertas | `IndicadorServiceTest`, `MonitoramentoServiceTest`, `JsonRepositoryTest`, `dashboard.feature` |
 | RF-12 | Alertas internos | Risco alto, mudança de classificação no último registro e talhão sem indicadores, exibidos no próprio sistema. | Implementado | `MonitoramentoService`, `Alerta` | Histórico e alertas | `MonitoramentoServiceTest`, `dashboard.feature` |
 
+| RF-13 | Importar clima real do INMET | Importar para um talhão, por período de até 92 dias, temperatura média, umidade do ar e chuva reais de uma estação do INMET (base jan–out/2026), com umidade do solo **simulada** por fórmula acadêmica. Inclui prévia, fonte identificada em cada registro e reimportação sem duplicar. | Implementado | `InmetService`, `InmetRepository`, `EstacaoMeteorologica`, `LeituraClimaticaDiaria` | Dados reais (INMET) | `InmetServiceTest`, `InmetRepositoryTest`, `inmet.feature` |
+
 ### Requisitos entregues na Sprint 1 (alinhados ao pré-projeto)
 
 | ID | Requisito | Status | Classe | Interface | Testes |
@@ -43,7 +45,7 @@ Detalhes em `docs/sprint-1-cli-java.md`. Os dados da Sprint 1 são ilustrativos.
 
 | ID | Requisito | Status | Observação |
 |---|---|---|---|
-| RD-01 | Compatibilidade de culturas por município | Parcial (demonstrativo) | Compara as médias dos indicadores registrados nos talhões do município com uma base **SIMULADA** de faixas por cultura e informa quando há dados insuficientes (mínimo de 3 registros). Não considera pH, textura nem fertilidade do solo e não é recomendação agronômica. Classe: `CompatibilidadeService`; tela: Compatibilidade (demo); teste: `CompatibilidadeServiceTest`. |
+| RD-01 | Compatibilidade de culturas por município | Parcial (demonstrativo) | Compara com uma base **SIMULADA** de faixas por cultura o clima real do município: médias de temperatura, umidade do ar e chuva da estação do INMET, jan–out/2026. Sem estação no município, usa as médias dos indicadores registrados nos talhões, com mínimo de 3 registros. Não considera pH, textura nem fertilidade do solo (nem a umidade do solo, quando a fonte é o INMET) e não é recomendação agronômica. Classe: `CompatibilidadeService`; tela: Compatibilidade (demo); teste: `CompatibilidadeServiceTest`. |
 
 ## 4. Regras de negócio
 

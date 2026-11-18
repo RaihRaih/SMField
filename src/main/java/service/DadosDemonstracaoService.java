@@ -4,33 +4,34 @@ import domain.Propriedade;
 import domain.Talhao;
 import domain.TipoOcorrencia;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 /**
- * Carrega dados fictícios para demonstração. Todos os nomes são marcados como
- * <b>SIMULADO — USO ACADÊMICO</b> e os municípios são fictícios; os valores não representam
- * condições agrícolas reais. A carga é idempotente: não duplica dados se já tiver sido feita.
+ * Carrega a demonstração do SMField em três polos reais do agronegócio, com <b>clima real do INMET</b>:
+ * <ul>
+ *   <li>Sorriso/MT (estação A904) — soja e milho safrinha;</li>
+ *   <li>Rio Verde/GO (estação A025) — soja e milho safrinha;</li>
+ *   <li>Patrocínio/MG (estação A523) — café do Cerrado Mineiro.</li>
+ * </ul>
+ * Os municípios e os dados climáticos (temperatura, umidade do ar e chuva) são reais. As propriedades,
+ * os talhões e as ocorrências são <b>fictícios</b> (prefixo {@value #MARCADOR}) e a umidade do solo é
+ * <b>simulada</b>. A carga é idempotente: não duplica dados se já tiver sido feita.
  */
 public class DadosDemonstracaoService {
 
-    public static final String MARCADOR = "[SIMULADO]";
+    public static final String MARCADOR = "[DEMO]";
 
     private final PropriedadeService propriedades;
     private final TalhaoService talhoes;
-    private final IndicadorService indicadores;
     private final OcorrenciaService ocorrencias;
-    private final Clock relogio;
+    private final InmetService inmet;
 
     public DadosDemonstracaoService(PropriedadeService propriedades, TalhaoService talhoes,
-                                    IndicadorService indicadores, OcorrenciaService ocorrencias, Clock relogio) {
+                                    OcorrenciaService ocorrencias, InmetService inmet) {
         this.propriedades = propriedades;
         this.talhoes = talhoes;
-        this.indicadores = indicadores;
         this.ocorrencias = ocorrencias;
-        this.relogio = relogio;
+        this.inmet = inmet;
     }
 
     public boolean jaCarregado() {
@@ -42,40 +43,36 @@ public class DadosDemonstracaoService {
         if (jaCarregado()) {
             return false;
         }
-        LocalDateTime agora = LocalDateTime.now(relogio).truncatedTo(ChronoUnit.HOURS);
-        LocalDate hoje = LocalDate.now(relogio);
+        // Sorriso/MT — maior produtor de soja do país
+        Propriedade sorriso = propriedades.cadastrar(MARCADOR + " Fazenda Boa Esperança", "Sorriso/MT");
+        Talhao sojaSorriso = talhoes.cadastrar(sorriso.getId(), "Talhão Soja 26/27", 120.0, "Soja");
+        Talhao milhoSorriso = talhoes.cadastrar(sorriso.getId(), "Talhão Milho Safrinha", 95.0, "Milho");
+        inmet.importar(sojaSorriso.getId(), "A904", data(10, 1), data(10, 31));     // plantio com a volta das chuvas
+        inmet.importar(milhoSorriso.getId(), "A904", data(4, 1), data(6, 30));      // safrinha até a colheita
 
-        Propriedade boaVista = propriedades.cadastrar(MARCADOR + " Fazenda Boa Vista", "Município Fictício A");
-        Propriedade santaLuzia = propriedades.cadastrar(MARCADOR + " Sítio Santa Luzia", "Município Fictício A");
-        Propriedade serraAzul = propriedades.cadastrar(MARCADOR + " Fazenda Serra Azul", "Município Fictício B");
+        // Rio Verde/GO — polo de grãos do sudoeste goiano
+        Propriedade rioVerde = propriedades.cadastrar(MARCADOR + " Fazenda Santa Helena", "Rio Verde/GO");
+        Talhao sojaRioVerde = talhoes.cadastrar(rioVerde.getId(), "Talhão Soja", 80.0, "Soja");
+        Talhao milhoRioVerde = talhoes.cadastrar(rioVerde.getId(), "Talhão Milho Safrinha", 60.0, "Milho");
+        inmet.importar(sojaRioVerde.getId(), "A025", data(8, 1), data(10, 31));     // seca até as chuvas de outubro
+        inmet.importar(milhoRioVerde.getId(), "A025", data(6, 1), data(8, 31));     // fim de ciclo na seca
 
-        Talhao milhoNorte = talhoes.cadastrar(boaVista.getId(), "Talhão Milho Norte", 12.0, "Milho");
-        Talhao sojaSul = talhoes.cadastrar(boaVista.getId(), "Talhão Soja Sul", 25.5, "Soja");
-        Talhao cafeEncosta = talhoes.cadastrar(santaLuzia.getId(), "Talhão Café Encosta", 8.0, "Café");
-        Talhao milhoBaixada = talhoes.cadastrar(santaLuzia.getId(), "Talhão Milho Baixada", 10.0, "Milho");
-        Talhao sojaPlato = talhoes.cadastrar(serraAzul.getId(), "Talhão Soja Platô", 30.0, "Soja");
-        talhoes.cadastrar(serraAzul.getId(), "Talhão Café Novo", 6.0, "Café"); // sem indicadores (NÃO CALCULADO)
+        // Patrocínio/MG — café do Cerrado Mineiro
+        Propriedade patrocinio = propriedades.cadastrar(MARCADOR + " Sítio Cerrado Mineiro", "Patrocínio/MG");
+        Talhao cafe = talhoes.cadastrar(patrocinio.getId(), "Talhão Café Catuaí", 15.0, "Café");
+        talhoes.cadastrar(patrocinio.getId(), "Talhão Café Novo", 5.0, "Café"); // sem indicadores (NÃO CALCULADO)
+        inmet.importar(cafe.getId(), "A523", data(8, 1), data(10, 31));              // seca até a florada
 
-        // Milho Norte: histórico de baixo -> médio -> baixo
-        indicadores.registrar(milhoNorte.getId(), 55.0, 24.0, 65.0, 12.0, agora.minusDays(2));
-        indicadores.registrar(milhoNorte.getId(), 33.0, 33.0, 55.0, 2.0, agora.minusDays(1));
-        indicadores.registrar(milhoNorte.getId(), 52.0, 26.0, 60.0, 10.0, agora.minusHours(3));
-        // Soja Sul: médio
-        indicadores.registrar(sojaSul.getId(), 35.0, 33.0, 35.0, 3.0, agora.minusHours(5));
-        // Café Encosta: baixo -> alto (gera alerta de mudança e de risco alto)
-        indicadores.registrar(cafeEncosta.getId(), 38.0, 31.0, 50.0, 8.0, agora.minusDays(1));
-        indicadores.registrar(cafeEncosta.getId(), 20.0, 39.5, 18.0, 0.0, agora.minusHours(2));
-        // Milho Baixada: excesso de água (médio)
-        indicadores.registrar(milhoBaixada.getId(), 88.0, 22.0, 85.0, 120.0, agora.minusHours(6));
-        // Soja Platô: ideal (baixo)
-        indicadores.registrar(sojaPlato.getId(), 60.0, 25.0, 70.0, 15.0, agora.minusHours(4));
-
-        ocorrencias.registrar(cafeEncosta.getId(), TipoOcorrencia.FALTA_IRRIGACAO,
-                MARCADOR + " Folhas murchas observadas na parte alta do talhão.", hoje);
-        ocorrencias.registrar(sojaSul.getId(), TipoOcorrencia.PRAGA,
-                MARCADOR + " Presença de lagartas em plantas da bordadura.", hoje.minusDays(1));
-        ocorrencias.registrar(milhoBaixada.getId(), TipoOcorrencia.EXCESSO_AGUA,
-                MARCADOR + " Acúmulo de água nas linhas de plantio após chuva forte.", hoje);
+        ocorrencias.registrar(milhoRioVerde.getId(), TipoOcorrencia.FALTA_IRRIGACAO,
+                MARCADOR + " Estresse hídrico no fim do ciclo: folhas enroladas nas horas mais quentes.", data(8, 28));
+        ocorrencias.registrar(sojaRioVerde.getId(), TipoOcorrencia.EXCESSO_AGUA,
+                MARCADOR + " Pontos de encharcamento nas linhas após chuva forte.", data(10, 31));
+        ocorrencias.registrar(cafe.getId(), TipoOcorrencia.PRAGA,
+                MARCADOR + " Minas de bicho-mineiro em folhas do terço superior.", data(10, 20));
         return true;
+    }
+
+    private static LocalDate data(int mes, int dia) {
+        return LocalDate.of(2026, mes, dia);
     }
 }

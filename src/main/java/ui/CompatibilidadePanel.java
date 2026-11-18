@@ -22,6 +22,7 @@ public class CompatibilidadePanel extends JPanel implements Atualizavel {
     private final JComboBox<String> comboMunicipio = new JComboBox<>();
     private final JButton botaoAvaliar = Estilo.botaoPrimario("Avaliar compatibilidade");
     private final JLabel mensagem = new JLabel(" ");
+    private final JLabel fonte = Estilo.nota(" ");
     private final JLabel perfilTemp = new JLabel("—");
     private final JLabel perfilSolo = new JLabel("—");
     private final JLabel perfilAr = new JLabel("—");
@@ -44,13 +45,13 @@ public class CompatibilidadePanel extends JPanel implements Atualizavel {
         selecao.add(comboMunicipio);
         selecao.add(botaoAvaliar);
         topo.add(selecao, BorderLayout.CENTER);
-        JLabel aviso = Estilo.nota(CompatibilidadeService.AVISO + " Usa as médias dos indicadores já registrados nos talhões do município; "
-                + "pH, textura e fertilidade do solo não fazem parte desta versão.");
+        JLabel aviso = Estilo.nota(CompatibilidadeService.AVISO + " Usa o clima real da estação do INMET do município "
+                + "(ou, se não houver estação, os indicadores registrados nos talhões); pH, textura e fertilidade não fazem parte desta versão.");
         topo.add(aviso, BorderLayout.SOUTH);
         add(topo, BorderLayout.NORTH);
 
         JPanel perfil = new JPanel(new GridLayout(4, 2, 12, 8));
-        perfil.setBorder(Estilo.secao("Médias registradas"));
+        perfil.setBorder(Estilo.secao("Médias do clima no município"));
         perfil.add(new JLabel("Temperatura:"));
         perfil.add(perfilTemp);
         perfil.add(new JLabel("Umidade do solo:"));
@@ -63,9 +64,13 @@ public class CompatibilidadePanel extends JPanel implements Atualizavel {
         JPanel resultado = new JPanel(new BorderLayout(4, 4));
         resultado.setBorder(Estilo.secao("Culturas da base simulada"));
         mensagem.setFont(Estilo.SUBTITULO);
-        resultado.add(mensagem, BorderLayout.NORTH);
+        JPanel cabecalho = new JPanel(new BorderLayout(2, 2));
+        cabecalho.setOpaque(false);
+        cabecalho.add(mensagem, BorderLayout.NORTH);
+        cabecalho.add(fonte, BorderLayout.SOUTH);
+        resultado.add(cabecalho, BorderLayout.NORTH);
         tabela.getColumnModel().getColumn(0).setPreferredWidth(90);
-        tabela.getColumnModel().getColumn(1).setPreferredWidth(190);
+        tabela.getColumnModel().getColumn(1).setMinWidth(190);
         tabela.getColumnModel().getColumn(2).setPreferredWidth(700);
         resultado.add(Estilo.rolagem(tabela), BorderLayout.CENTER);
 
@@ -88,6 +93,7 @@ public class CompatibilidadePanel extends JPanel implements Atualizavel {
         }
         CompatibilidadeService.Avaliacao a = servicos.compatibilidade().avaliar(m.toString());
         mensagem.setText(a.mensagem());
+        fonte.setText("<html>Fonte: " + a.fonte() + "</html>");
         if (!a.dadosSuficientes()) {
             perfilTemp.setText("—");
             perfilSolo.setText("—");
@@ -96,9 +102,10 @@ public class CompatibilidadePanel extends JPanel implements Atualizavel {
             return;
         }
         perfilTemp.setText(Estilo.numero(a.perfil().temperatura()) + " °C");
-        perfilSolo.setText(Estilo.numero(a.perfil().umidadeSolo()) + " %");
+        perfilSolo.setText(a.perfil().umidadeSolo() == null ? "não considerada (INMET não mede)"
+                : Estilo.numero(a.perfil().umidadeSolo()) + " %");
         perfilAr.setText(Estilo.numero(a.perfil().umidadeAr()) + " %");
-        perfilPrec.setText(Estilo.numero(a.perfil().precipitacao()) + " mm (" + a.quantidadeRegistros() + " registros)");
+        perfilPrec.setText(Estilo.numero(a.perfil().precipitacao()) + " mm/dia (" + a.quantidadeRegistros() + " dias)");
         for (CompatibilidadeService.CompatibilidadeCultura c : a.culturas()) {
             modelo.addRow(new Object[]{c.cultura(), c.compativel() ? "Potencialmente compatível" : "Não compatível",
                     c.divergencias().isEmpty() ? "—" : String.join("; ", c.divergencias())});

@@ -1,0 +1,28 @@
+Aba INMET no índice 7 de 9
+Base carregada: true | info: Não há estação do INMET chamada "Contagem". Busque a cidade mais próxima (ex.: Belo Horizonte) e selecione a estação.
+Estações no combo (Contagem sem estação): 634
+Busca 'Belo Horizonte': 3 estações; selecionada: A521 — Belo Horizonte - Pampulha/MG
+Info: Belo Horizonte - Pampulha/MG · região SE · altitude 854,0 m · cobertura 99,7% · dados de 01/01/2026 a 31/10/2026
+Período sugerido: 02/10/2026 a 31/10/2026
+Prévia: 31 linhas | 31 dia(s) no período · 31 pronto(s) para importar.
+   01/10/2026 | 27,5 | 48,8 | 0,4 | 15,5 | 45 | Médio | Pronto para importar | 
+   02/10/2026 | 21,7 | 78,8 | 10,2 | 26,8 | 18 | Baixo | Pronto para importar | 
+   03/10/2026 | 19,6 | 87,8 | 22,8 | 44,1 | 8 | Baixo | Pronto para importar | 
+   04/10/2026 | 22,1 | 75,9 | 0,4 | 39,2 | 28 | Baixo | Pronto para importar | 
+   05/10/2026 | 21,4 | 82,8 | 66,6 | 89,3 | 53 | Médio | Pronto para importar | 
+[ERRO período invertido] Dados inválidos :: A data inicial deve ser anterior ou igual à data final.
+[ERRO período longo] Dados inválidos :: Escolha um período de até 92 dias (informado: 304).
+[Importação outubro A521] SMField :: 31 dia(s) importado(s) como indicadores do talhão. 0 já existiam (não duplicados) · 0 sem dados completos no INMET (ignorados).  Umidade do solo SIMULADA; demais valores reais do INMET.
+[Importação repetida] SMField :: 0 dia(s) importado(s) como indicadores do talhão. 31 já existiam (não duplicados) · 0 sem dados completos no INMET (ignorados).  Umidade do solo SIMULADA; demais valores reais do INMET.
+Histórico Talhão A: 31 | último: 31/10/2026 12:00 | 50,5 | 22,8 | 76,7 | 0,2 | 10 | Baixo | sem mudança | INMET A521 (Belo Horizonte - Pampulha/MG) · umidade do solo SIMULADA | 
+[Confirmação demo] Dados de demonstração :: Carregar a demonstração em três polos do agronegócio, com clima REAL do INMET?  • Sorriso/MT — soja e milho safrinha (estação A904) • Rio Verde/GO — soja e milho safrinha (estação A025) • Patrocínio/MG — café (estação A523)  Municípios e clima (temperatura, umidade do ar, chuva) são reais. Propriedades, talhões e ocorrências são fictícios [DEMO]; a umidade do solo é simulada.
+[Demo concluída] SMField :: Dados de demonstração carregados.
+   5 | [DEMO] Fazenda Santa Helena | Talhão Milho Safrinha | Milho | 60 | 68 | Alto | 31/08/2026 12:00 | 
+   4 | [DEMO] Fazenda Santa Helena | Talhão Soja | Soja | 80 | 53 | Médio | 31/10/2026 12:00 | 
+   3 | [DEMO] Fazenda Boa Esperança | Talhão Milho Safrinha | Milho | 95 | 45 | Médio | 30/06/2026 12:00 | 
+   2 | [DEMO] Fazenda Boa Esperança | Talhão Soja 26/27 | Soja | 120 | 28 | Baixo | 31/10/2026 12:00 | 
+   1 | Fazenda Modelo | Talhão A | Milho | 12 | 10 | Baixo | 31/10/2026 12:00 | 
+   6 | [DEMO] Sítio Cerrado Mineiro | Talhão Café Catuaí | Café | 15 | 8 | Baixo | 31/10/2026 12:00 | 
+   7 | [DEMO] Sítio Cerrado Mineiro | Talhão Café Novo | Café | 5 | — | Não calculado | — | 
+Histórico Milho Safrinha Rio Verde: 92 registros; alertas: 5
+FIM OK

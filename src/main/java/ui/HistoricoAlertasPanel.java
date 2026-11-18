@@ -32,7 +32,7 @@ public class HistoricoAlertasPanel extends JPanel implements Atualizavel {
 
     private final JComboBox<Estilo.OpcaoTalhao> comboTalhao = new JComboBox<>();
     private final DefaultTableModel modeloHistorico = Estilo.modelo("Data/hora", "Solo (%)", "Temp. (°C)", "Ar (%)",
-            "Precip. 24 h (mm)", "Índice", "Classificação", "Variação");
+            "Precip. 24 h (mm)", "Índice", "Classificação", "Variação", "Fonte dos dados");
     private final JTable tabelaHistorico = Estilo.tabela(modeloHistorico);
     private final JLabel avisoHistorico = Estilo.nota(" ");
 
@@ -97,7 +97,8 @@ public class HistoricoAlertasPanel extends JPanel implements Atualizavel {
                     : "sem mudança";
             modeloHistorico.addRow(new Object[]{Estilo.formatar(i.getDataHora()), Estilo.numero(i.getUmidadeSolo()),
                     Estilo.numero(i.getTemperatura()), Estilo.numero(i.getUmidadeAr()),
-                    Estilo.numero(i.getPrecipitacao24h()), h.resultado().getIndice(), h.resultado().getNivel(), variacao});
+                    Estilo.numero(i.getPrecipitacao24h()), h.resultado().getIndice(), h.resultado().getNivel(), variacao,
+                    i.getFonte()});
         }
         avisoHistorico.setText(hist.isEmpty() ? "Sem registros de indicadores para este talhão."
                 : hist.size() + " registro(s) em ordem cronológica (mais antigo primeiro).");

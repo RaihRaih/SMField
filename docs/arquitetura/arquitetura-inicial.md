@@ -35,7 +35,7 @@ Não há dependências circulares: `domain` não conhece nenhuma outra camada e 
 
 ## 3. Classes implementadas
 
-### `domain` (15 tipos)
+### `domain` (17 tipos)
 
 | Classe | Papel |
 |---|---|
@@ -50,10 +50,12 @@ Não há dependências circulares: `domain` não conhece nenhuma outra camada e 
 | `RegistroHistorico` | Item do histórico: indicador + resultado + nível anterior. |
 | `Alerta` / `TipoAlerta` | Alerta interno e seus tipos. |
 | `RequisitoCultura` | Faixas simuladas de uma cultura (módulo demonstrativo). |
+| `EstacaoMeteorologica` | Estação automática do INMET (código, nome, UF, coordenadas, cobertura). |
+| `LeituraClimaticaDiaria` | Resumo diário real de uma estação (temperatura, umidade do ar, chuva). |
 | `Identificavel` | Contrato de entidade com id. |
 | `Validacao` / `ValidacaoException` | Funções de validação e exceção com mensagem para o usuário. |
 
-### `service` (10 classes)
+### `service` (11 classes)
 
 | Classe | Papel |
 |---|---|
@@ -63,23 +65,25 @@ Não há dependências circulares: `domain` não conhece nenhuma outra camada e 
 | `RiscoService` | RF-05/RF-06/RF-08: motor de risco, classificação e justificativa. |
 | `MonitoramentoService` | RF-07/RF-08/RF-11/RF-12: painel, resumo, detalhe, histórico e alertas. |
 | `OcorrenciaService` | RF-10: ocorrências de campo. |
-| `CompatibilidadeService` | Módulo demonstrativo de compatibilidade de culturas por município. |
-| `DadosDemonstracaoService` | Carga idempotente dos dados SIMULADOS. |
+| `InmetService` | RF-13: busca de estações (com sugestão pelo município, ex.: "Sorriso/MT"), umidade do solo simulada, prévia e importação do clima real do INMET. |
+| `CompatibilidadeService` | Módulo demonstrativo de compatibilidade de culturas por município, usando o clima real da estação do INMET quando há. |
+| `DadosDemonstracaoService` | Carga idempotente da demonstração em Sorriso/MT, Rio Verde/GO e Patrocínio/MG, com clima real do INMET. |
 | `ConversorEntrada` | Conversão de texto digitado em número/data com mensagens claras. |
 | `ServicosSMField` | Cria e compartilha os serviços e repositórios (mesma fonte de dados para todas as telas). |
 
-### `infra` (7 classes)
+### `infra` (8 classes)
 
 | Classe | Papel |
 |---|---|
 | `JsonRepository<T>` | Repositório genérico em arquivo JSON, com id sequencial e gravação atômica. |
 | `PropriedadeRepository`, `TalhaoRepository`, `IndicadorRepository`, `OcorrenciaRepository` | Consultas específicas de cada entidade. |
 | `ArmazenamentoLocal` | Agrupa os repositórios de uma pasta de dados. |
+| `InmetRepository` | Leitura (somente consulta) da base real do INMET embutida em `src/main/resources/inmet/`, carregada uma vez por execução. |
 | `PersistenciaException` | Falha de leitura/gravação com mensagem clara. |
 
-### `ui` (13 tipos)
+### `ui` (14 tipos)
 
-`AppMain`, `MainFrame`, `DashboardPanel`, `PropriedadePanel`, `TalhaoPanel`, `IndicadoresPanel`, `DetalhesRiscoPanel`, `OcorrenciasPanel`, `HistoricoAlertasPanel`, `CompatibilidadePanel`, `ResultadoRiscoView`, `Estilo` (paleta e utilitários visuais) e `Atualizavel` (contrato de recarga das telas).
+`AppMain`, `MainFrame`, `InmetPanel`, `DashboardPanel`, `PropriedadePanel`, `TalhaoPanel`, `IndicadoresPanel`, `DetalhesRiscoPanel`, `OcorrenciasPanel`, `HistoricoAlertasPanel`, `CompatibilidadePanel`, `ResultadoRiscoView`, `Estilo` (paleta e utilitários visuais) e `Atualizavel` (contrato de recarga das telas).
 
 ### Módulo da Sprint 1 — pacote `smfield`
 
@@ -116,6 +120,8 @@ Cadastro → Indicadores → RiscoService (índice + nível + justificativa) →
 - **Duplicidades:** não são aceitas propriedades com o mesmo nome e município, nem talhões com o mesmo nome na mesma propriedade; a carga de demonstração não se repete.
 - **Arquivo corrompido:** o sistema mostra uma mensagem clara indicando o arquivo, em vez de falhar silenciosamente.
 
+- **Base do INMET:** arquivos CSV somente leitura em `src/main/resources/inmet/`, embutidos no `.jar`. Os registros importados viram indicadores comuns em `indicadores.json`, com o campo `fonte` preenchido. Registros antigos sem esse campo continuam válidos e são tratados como "Registro manual".
+
 ## 6. Principais decisões técnicas
 
 | Decisão | Motivo |
@@ -129,3 +135,6 @@ Cadastro → Indicadores → RiscoService (índice + nível + justificativa) →
 | Exclusão em cascata com confirmação | Evita registros órfãos e deixa o impacto visível antes da ação. |
 | Precipitação = acumulado das últimas 24 h | Período de referência definido para tornar a regra objetiva. |
 | Cucumber em português (`# language: pt`) | Cenários legíveis para a equipe e para a professora. |
+| Base do INMET embutida (CSV) em vez de API online | Funciona offline e é reproduzível na apresentação; o script de tratamento fica em `ferramentas/inmet/` para atualizar a base. |
+| Umidade do solo simulada por fórmula | O INMET não mede umidade do solo; a fórmula é determinística, documentada e marcada como SIMULADA em cada registro. |
+| Carregamento da base do INMET em segundo plano | A janela abre sem esperar a leitura dos 128 mil dias. |

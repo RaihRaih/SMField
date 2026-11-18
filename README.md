@@ -27,12 +27,32 @@ Apoiar produtores e gestores agrícolas na identificação e priorização de ta
 | RF-10* | Registrar ocorrências de campo (praga, doença, falta de irrigação, excesso de água, outra) | Aba **5. Ocorrências** |
 | RF-11* | Histórico de indicadores e riscos (registros anteriores preservados) | Aba **6. Histórico e alertas** |
 | RF-12* | Alertas internos (risco alto, mudança de classificação, talhão sem indicadores) | Aba **6. Histórico e alertas** |
+| RF-13* | Importar clima **real do INMET** (temperatura, umidade do ar e chuva) para um talhão, com umidade do solo **simulada** | Aba **Dados reais (INMET)** |
 | Extra (P3) | Compatibilidade de culturas por município — **módulo demonstrativo com base simulada** | Aba **Compatibilidade (demo)** |
 | Sprint 1 | Recomendação de plantio, "o que plantar agora" e calendário de colheita por região (linha de comando) | `java -cp target/smfield.jar smfield.Main listar` — ver `docs/sprint-1-cli-java.md` |
 
 \* Requisitos complementares derivados da visão do produto (`docs/requisitos/visao-do-produto.md`).
 
 Os dados são gravados em arquivos JSON locais e continuam disponíveis ao fechar e abrir o programa.
+
+### Dados reais do INMET
+
+O projeto inclui a base real das estações automáticas do **INMET** (634 estações, de 01/01/2026 a 31/10/2026) em `src/main/resources/inmet/`. Na aba **Dados reais (INMET)**:
+
+1. escolha o talhão;
+2. busque a estação pela cidade, UF ou código (se o município da propriedade tiver estação, ela é sugerida automaticamente);
+3. informe o período (até 92 dias) e clique em **Visualizar prévia** para ver dia a dia os valores e o risco que seria calculado;
+4. clique em **Importar para o talhão**.
+
+Cada dia vira um registro de indicadores, com a fonte identificada ("INMET A521 … · umidade do solo SIMULADA"). Importar o mesmo período de novo não duplica registros.
+
+- **Reais (INMET):** temperatura média, umidade relativa do ar e chuva do dia.
+- **Simulada:** umidade do solo, porque o INMET não a mede. A fórmula acadêmica, em que a chuva recente pesa mais, ar úmido aumenta e calor reduz, é:
+
+  `20 + 0,8 × Σ chuva(d−i) × 0,75^i (7 dias) + 0,3 × (umidade do ar média de 7 dias − 60) − max(0, temperatura − 25)`, limitada a 5–95%.
+- **Acadêmico:** o cálculo do índice de risco continua o mesmo.
+
+Origem e atualização da base: `ferramentas/inmet/README.md`.
 
 ## 3. Tecnologias
 
@@ -109,9 +129,9 @@ java -jar target/smfield.jar
 mvn test
 ```
 
-Resultado medido (`mvn clean verify`): **171 testes executados, 0 falhas, 0 erros**:
+Resultado medido (`mvn clean verify`): **192 testes executados, 0 falhas, 0 erros**:
 
-- Sprint 2: 133 execuções JUnit (83 métodos de teste, sendo 9 parametrizados) e **15 cenários Cucumber / 77 passos**;
+- Sprint 2: 152 execuções JUnit (102 métodos de teste, sendo 9 parametrizados) e **17 cenários Cucumber / 89 passos**;
 - Sprint 1: 23 testes JUnit (pacote `smfield`).
 
 Relatórios gerados:
@@ -127,13 +147,13 @@ Cobertura medida nesta entrega (linhas):
 
 | Pacote | Linhas | Ramos |
 |---|---|---|
-| `service` | 99,2% | 94,8% |
-| `domain` | 98,9% | 95,3% |
-| `infra` | 94,9% | 86,2% |
+| `service` | 99,4% | 92,9% |
+| `domain` | 99,0% | 95,0% |
+| `infra` | 94,7% | 89,1% |
 | `smfield` (Sprint 1) | 76,9% | 71,5% |
 | `smfield.domain` (Sprint 1) | 0% | 0% |
 | `ui` | 0% (interface Swing não tem testes automatizados no build) | 0% |
-| **Total do projeto** | 44,0% | 55,1% |
+| **Total do projeto** | 45,1% | 56,4% |
 
 A regra do JaCoCo no `pom.xml` exige no mínimo **80% de linhas** nos pacotes `service` e `domain` (RNF-06). A interface foi validada por um roteiro executado clicando nos componentes reais (ver `docs/evidencias/`).
 
@@ -146,9 +166,11 @@ SMField/
 │   ├── domain/   entidades e regras invariantes (Propriedade, Talhao, IndicadorAmbiental, NivelRisco, ResultadoRisco...)
 │   ├── service/  regras de negócio (cadastros, motor de risco, monitoramento, alertas, demonstração)
 │   ├── infra/    persistência JSON (JsonRepository e repositórios por entidade)
-│   ├── ui/       interface Swing (AppMain, MainFrame e painéis)
+│   ├── ui/       interface Swing (AppMain, MainFrame e painéis, incluindo InmetPanel)
 │   └── smfield/  Sprint 1: recomendador de plantio por região (linha de comando)
 ├── src/main/resources/dados/   Sprint 1: culturas.json e regioes.json (valores ilustrativos)
+├── src/main/resources/inmet/   base real do INMET (estacoes.csv e diario_consolidado.csv)
+├── ferramentas/inmet/          script que gera a base do INMET e instruções de atualização
 ├── src/test/java/          testes JUnit (domain, service, infra) e passos Cucumber (bdd)
 ├── src/test/resources/features/   cenários Gherkin (.feature)
 └── docs/                   requisitos, arquitetura, relatório, pitch e evidências
@@ -158,13 +180,23 @@ Detalhes em `docs/arquitetura/arquitetura-inicial.md`.
 
 ## 11. Dados de demonstração
 
-No menu `Arquivo > Carregar dados de demonstração (SIMULADOS)` — ou no botão do Dashboard, quando ainda não carregados — o sistema cria:
+No menu `Arquivo > Carregar dados de demonstração (clima real do INMET)`, ou no botão do Dashboard quando ainda não carregados, o sistema monta a demonstração em **três polos reais do agronegócio**, com o clima **real** da estação do INMET de cada município:
 
-- 3 propriedades e 6 talhões (milho, soja e café) em municípios fictícios;
-- indicadores que geram talhões de risco **alto**, **médio** e **baixo**, um talhão **sem indicadores** e históricos com mudança de classificação;
-- 3 ocorrências de campo.
+| Município (estação) | Propriedade [DEMO] | Talhões | Período importado | Situação no último dia |
+|---|---|---|---|---|
+| Sorriso/MT (A904) | Fazenda Boa Esperança | Soja 26/27 (120 ha) | out/2026: plantio com a volta das chuvas | Baixo |
+| | | Milho Safrinha (95 ha) | abr–jun/2026 | Médio |
+| Rio Verde/GO (A025) | Fazenda Santa Helena | Soja (80 ha) | ago–out/2026, com 67,8 mm de chuva em 31/10 | Médio |
+| | | Milho Safrinha (60 ha) | jun–ago/2026: fim de ciclo na seca | **Alto (68)** |
+| Patrocínio/MG (A523) | Sítio Cerrado Mineiro | Café Catuaí (15 ha) | ago–out/2026: seca até a florada | Baixo |
+| | | Café Novo (5 ha) | sem medições | Não calculado |
 
-Todos os registros têm o prefixo **[SIMULADO]** e servem apenas para uso acadêmico. A carga não é duplicada: se já tiver sido feita, o sistema avisa e não cria registros novamente.
+- São 398 dias importados e 3 ocorrências de campo.
+- O painel mostra os quatro estados (alto, médio, baixo e não calculado), com alertas de risco alto, de mudança de classificação e de talhão sem dados.
+- **O que é real:** os municípios e o clima (temperatura, umidade do ar e chuva).
+- **O que é fictício:** propriedades, talhões e ocorrências, marcados com o prefixo **[DEMO]**. A umidade do solo é simulada.
+- A carga não é duplicada: se já tiver sido feita, o sistema avisa e não cria registros novamente.
+- Para recarregar do zero, feche o programa e apague a pasta `dados/`.
 
 ## 12. Modelo de risco
 
@@ -188,10 +220,12 @@ Faixas aceitas no registro: umidades 0–100%, temperatura −20 a 60 °C, preci
 ## 13. Limitações
 
 - **As faixas de referência são hipóteses acadêmicas** para demonstrar a lógica do software. Elas **não são limites agronômicos validados** e não diferenciam culturas, fases de desenvolvimento ou tipos de solo. Esse aviso também aparece na interface.
-- Os dados são informados manualmente (ou simulados); não há integração com sensores, estações meteorológicas ou APIs climáticas.
+- Os dados do INMET cobrem apenas jan–out/2026 e vêm de um arquivo embutido. Não há consulta online, e as estações podem estar longe da propriedade (Contagem, por exemplo, usa a estação de Belo Horizonte).
+- A **umidade do solo dos registros importados é simulada**, porque o INMET não a mede. Medições reais exigiriam sensores de solo.
+- Não há integração com sensores nem APIs climáticas em tempo real.
 - As ocorrências de campo são informativas e não alteram o índice numérico.
 - O recomendador da Sprint 1 usa dados climáticos e de culturas **ilustrativos** (3 regiões, 6 culturas), que precisam ser substituídos por fontes oficiais (INMET, ZARC/Embrapa) antes de uso real.
-- O módulo de compatibilidade de culturas usa uma **base de requisitos simulada** e só considera os indicadores registrados (temperatura, umidades e precipitação); pH, textura e fertilidade do solo não fazem parte desta versão.
+- O módulo de compatibilidade de culturas compara o clima real do município, vindo da estação do INMET, com uma **base de requisitos simulada**. Sem estação no município, usa os indicadores registrados nos talhões. Umidade do solo (não medida pelo INMET), pH, textura e fertilidade não entram na comparação com o INMET.
 - A persistência em JSON é adequada para uso local por um usuário; não há controle de acesso nem uso simultâneo por várias pessoas.
 
 ## 14. Integrantes do projeto

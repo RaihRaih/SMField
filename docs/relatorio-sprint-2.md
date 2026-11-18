@@ -30,6 +30,7 @@ Ajudar produtores e gestores a **priorizar os talhões que precisam de atenção
 | Maven | Build, dependências, execução (`exec:java`) e empacotamento (`smfield.jar`) |
 | Java Swing | Interface gráfica desktop |
 | Gson 2.10.1 | Persistência em arquivos JSON locais |
+| Base do INMET (CSV) | Clima real de 634 estações automáticas, jan–out/2026, tratado previamente por script Python |
 | JUnit 5 (5.10.2) | Testes unitários |
 | Cucumber 7.18.0 + Gherkin | Testes de comportamento (cenários escritos em português) |
 | JaCoCo 0.8.11 | Medição de cobertura e verificação da meta de 80% |
@@ -44,7 +45,7 @@ O código está organizado em quatro camadas (pacotes Java):
 - **`infra`** — persistência: `JsonRepository<T>` genérico e repositórios por entidade, gravando arquivos JSON na pasta `dados/`.
 - **`ui`** — interface Swing: janela principal com abas e painéis que apenas chamam os serviços e exibem os resultados.
 
-A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema da Sprint 2 possui **45 tipos Java autorais** (15 em `domain`, 10 em `service`, 7 em `infra` e 13 em `ui`).
+A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema da Sprint 2 possui **50 tipos Java autorais** (17 em `domain`, 11 em `service`, 8 em `infra` e 14 em `ui`).
 
 O módulo da Sprint 1 (recomendador de plantio por região, linha de comando) foi mantido sem alterações no pacote `smfield`, com seus dados em `src/main/resources/dados/`. Ele compartilha o mesmo `pom.xml` e o mesmo build. Detalhes em `docs/arquitetura/arquitetura-inicial.md`.
 
@@ -64,6 +65,7 @@ O módulo da Sprint 1 (recomendador de plantio por região, linha de comando) fo
 | RF-10 Ocorrências de campo | `OcorrenciaCampo`, `OcorrenciaService` | Ocorrências |
 | RF-11 Histórico | `IndicadorService`, `MonitoramentoService`, `RegistroHistorico` | Histórico e alertas |
 | RF-12 Alertas internos | `MonitoramentoService`, `Alerta`, `TipoAlerta` | Histórico e alertas |
+| RF-13 Importar clima real do INMET | `InmetService`, `InmetRepository`, `EstacaoMeteorologica`, `LeituraClimaticaDiaria` | Dados reais (INMET) |
 | Demonstrativo: compatibilidade de culturas | `CompatibilidadeService`, `RequisitoCultura` | Compatibilidade (demo) |
 | Sprint 1: recomendação de plantio, "o que plantar agora" e calendário de colheita | `smfield.Recomendador`, `smfield.Calendario`, `smfield.DadosLoader`, `smfield.Main` | Linha de comando |
 
@@ -112,8 +114,31 @@ Documentação completa: `docs/sprint-1-cli-java.md`.
 
 - RF-09: edição e exclusão de talhões, com confirmação que informa quantos registros vinculados serão removidos.
 - RF-10: ocorrências de campo.
-- Carga de **dados de demonstração SIMULADOS**, sem duplicação.
+- Carga de **dados de demonstração** em três polos reais do agronegócio (Sorriso/MT, Rio Verde/GO e Patrocínio/MG), com clima real do INMET e sem duplicação.
 - Módulo demonstrativo de compatibilidade de culturas por município (ver seção 11).
+
+### Incremento complementar — dados reais do INMET (RF-13)
+
+Para aproximar o sistema de dados reais, foi integrada uma base das estações automáticas do **INMET**: 634 estações, de 01/01/2026 a 31/10/2026, com mais de 128 mil dias de registro. A base foi tratada previamente por um script Python (`ferramentas/inmet/tratar_inmet.py`), recebido de um colaborador, que resume os registros horários em valores diários.
+
+- **Aba "Dados reais (INMET)":**
+  - busca de estação por cidade, UF ou código, com sugestão automática pelo município da propriedade;
+  - prévia dia a dia com o risco que seria calculado;
+  - importação de até 92 dias para um talhão.
+- **Origem dos dados:** temperatura média, umidade do ar e chuva do dia são reais. A **umidade do solo é simulada**, porque o INMET não a mede, por uma fórmula acadêmica documentada em que a chuva recente pesa mais, ar úmido aumenta e calor reduz. O índice de risco segue o mesmo modelo acadêmico.
+- **Rastreabilidade:** cada registro guarda a fonte (ex.: "INMET A521 (Belo Horizonte - Pampulha/MG) · umidade do solo SIMULADA"), exibida no histórico, na lista de indicadores e na consulta de risco. Registros manuais aparecem como "Registro manual".
+- **Sem duplicação:** importar o mesmo período de novo não cria registros repetidos. Dias sem dados completos no INMET são ignorados e informados.
+- **Demonstração em municípios reais do agronegócio**, substituindo os municípios fictícios, com o clima real do ciclo de cada cultura:
+  - **Sorriso/MT** (estação A904): soja no plantio de outubro e milho safrinha de abril a junho;
+  - **Rio Verde/GO** (A025): soja de agosto a outubro e milho safrinha de junho a agosto. No fim da seca de agosto (solo seco, cerca de 30 °C e umidade do ar abaixo de 30%), esse talhão chega a risco **alto (68)** e o sistema gera o alerta;
+  - **Patrocínio/MG** (A523): café Catuaí de agosto a outubro, da seca à florada, e um talhão de café novo ainda sem medições.
+
+  Os municípios e o clima são reais; propriedades, talhões e ocorrências são fictícios (prefixo [DEMO]).
+- **Compatibilidade com clima real:** quando o município tem estação, a aba "Compatibilidade (demo)" passa a usar o clima real da estação (jan–out/2026) em vez das médias de poucos registros. Como resultado:
+  - Sorriso aparece compatível com milho, soja e feijão;
+  - Patrocínio inclui o café.
+
+  A umidade do solo fica de fora dessa comparação, porque o INMET não a mede.
 
 ### Refinamentos da Sprint 2
 
@@ -134,6 +159,11 @@ Documentação completa: `docs/sprint-1-cli-java.md`.
 | Selo do índice esticado e colunas truncadas em algumas telas | Ajustes de layout identificados pelas capturas de tela |
 | O pacote de trabalho não continha o código da Sprint 1, e o primeiro envio da branch `sprint-2` o removia | Código, dados, testes e documentação da Sprint 1 restaurados a partir da branch `dev` e integrados ao build |
 | A versão 2.22.3 do `maven-surefire-plugin` não existe no Maven Central | Atualizado para a versão 3.2.5 |
+| Cucumber em português leu "27.54" como 2754, porque no padrão brasileiro a vírgula é o separador decimal | Cenário escrito com "27,54" |
+| No Windows, ao carregar a demonstração (398 gravações seguidas de `indicadores.json`), aparecia "Não foi possível gravar o arquivo de dados". Antivírus e indexador do Windows seguram o arquivo por alguns milissegundos após cada gravação | A troca do arquivo passou a ser repetida até 8 vezes, com pausas curtas, antes de informar erro; o temporário é sempre apagado. Teste novo para falha persistente |
+| A demonstração usava municípios fictícios | Substituídos por três polos reais do agronegócio (Sorriso/MT, Rio Verde/GO e Patrocínio/MG), com clima real do INMET |
+| A compatibilidade apontava "nenhuma cultura compatível" em Sorriso/MT, porque usava só as poucas medições de períodos secos e a umidade do solo simulada | Passou a usar o clima real da estação do município, sem a umidade do solo |
+| Município sem estação (ex.: Contagem) fazia a tela pré-selecionar uma estação sem dados, e empates de cobertura escolhiam a estação secundária | Orientação para buscar a cidade mais próxima e desempate pela estação principal (A521) |
 
 ## 8. Regras de negócio
 
@@ -164,19 +194,30 @@ Comando executado: `mvn clean verify`
 
 | Item | Resultado real |
 |---|---|
-| Métodos de teste JUnit 5 — Sprint 2 | 83 (74 `@Test` e 9 `@ParameterizedTest`), 133 execuções |
+| Métodos de teste JUnit 5 — Sprint 2 | 102 (93 `@Test` e 9 `@ParameterizedTest`), 152 execuções |
 | Testes JUnit 5 — Sprint 1 (preservados) | 23 |
-| Cenários Cucumber executados | 15 (9 cenários + 6 exemplos de esquema), 77 passos |
-| Total de testes no Surefire | **171 executados, 0 falhas, 0 erros, 0 ignorados** |
-| Cobertura de linhas `service` | 99,2% (ramos 94,8%) |
-| Cobertura de linhas `domain` | 98,9% (ramos 95,3%) |
-| Cobertura de linhas `infra` | 94,9% (ramos 86,2%) |
+| Cenários Cucumber executados | 17 (11 cenários + 6 exemplos de esquema), 89 passos |
+| Total de testes no Surefire | **192 executados, 0 falhas, 0 erros, 0 ignorados** |
+| Cobertura de linhas `service` | 99,4% (ramos 92,9%) |
+| Cobertura de linhas `domain` | 99,0% (ramos 95,0%) |
+| Cobertura de linhas `infra` | 94,7% (ramos 89,1%) |
 | Cobertura de linhas `ui` | 0% — sem testes automatizados de interface |
 | Cobertura de linhas `smfield` (Sprint 1) | 76,9% (`smfield.domain`: 0%) |
-| Cobertura total do projeto | 44,0% de linhas |
+| Cobertura total do projeto | 45,1% de linhas |
 | Verificação JaCoCo (≥ 80% em `service` e `domain`) | Aprovada ("All coverage checks have been met") |
 
-**Cenários BDD** (`src/test/resources/features`): cadastro de propriedade; cadastro de talhão vinculado; talhão sem propriedade rejeitado; risco baixo; risco alto; dados insuficientes; indicador inválido; classificação nos limites 0, 33, 34, 66, 67 e 100; dashboard com riscos diferentes e alertas; histórico preservado após fechar e reabrir.
+**Cenários BDD** (`src/test/resources/features`):
+- cadastro de propriedade;
+- cadastro de talhão vinculado;
+- talhão sem propriedade rejeitado;
+- risco baixo, risco alto, dados insuficientes e indicador inválido;
+- classificação nos limites 0, 33, 34, 66, 67 e 100;
+- dashboard com riscos diferentes e alertas;
+- histórico preservado após fechar e reabrir;
+- importação de uma semana de dados reais do INMET (Belo Horizonte, 01–07/10/2026);
+- reimportação sem duplicar registros.
+
+A integração com o INMET também foi validada na interface: busca de estação, prévia, importação, erros de período, reimportação e demonstração com clima real. As telas estão em `docs/evidencias/inmet/`.
 
 **Teste manual / de interface.** O roteiro obrigatório (Fazenda Modelo, Contagem, Talhão A, 12 ha, milho, duas medições, histórico, fechar e reabrir) foi executado na interface real, acionando os botões dos painéis Swing em um display virtual, com captura de tela de cada etapa. Também foram verificados os cenários de erro (município vazio, área negativa, letras em campo numérico, umidade 150, indicador ausente). O registro está em `docs/evidencias/log-roteiro-interface.txt` e as telas em `docs/evidencias/telas/`. O mesmo roteiro também existe como teste automatizado de serviço (`RoteiroDemonstracaoTest`).
 
@@ -200,9 +241,10 @@ Funcionalidades comprovadamente operacionais (testes automatizados + roteiro na 
 
 - **Modelo de risco acadêmico:** faixas e pesos são hipóteses para demonstrar a lógica do software. Não são limites agronômicos validados e não variam por cultura, fase da lavoura ou tipo de solo.
 - **Dados da Sprint 1 ilustrativos:** as normais climatológicas e os parâmetros das culturas do recomendador são aproximados e devem ser substituídos por dados do INMET e do ZARC/Embrapa antes de uso real.
-- **Dados manuais ou simulados:** não há sensores, estações meteorológicas nem APIs. Os dados de demonstração são fictícios (municípios fictícios, prefixo [SIMULADO]) e não representam condições reais. Os valores usados no roteiro com "Contagem" também são fictícios.
+- **Dados do INMET:** cobrem só jan–out/2026, vêm de um arquivo embutido (sem consulta online) e representam a estação, não a propriedade. A umidade do solo dos registros importados é **simulada**.
+- **Dados de demonstração:** os municípios e o clima são reais (INMET), mas as propriedades, os talhões e as ocorrências são fictícios (prefixo [DEMO]), e a umidade do solo é simulada. Não há sensores nem APIs em tempo real. Os valores digitados no roteiro com "Contagem" também são fictícios.
 - **Ocorrências** não alteram o índice numérico nesta versão.
-- **Relação com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre o clima de uma região e os requisitos das culturas. Essa proposta foi atendida na **Sprint 1** pelo recomendador de plantio por região. A **Sprint 2** seguiu os requisitos do repositório e implementou o monitoramento de riscos por talhão. O módulo "Compatibilidade (demo)" da interface faz uma ligação simples entre as duas sprints: compara as médias dos indicadores registrados nos talhões de um município com uma **base simulada** de requisitos por cultura. Nenhuma das duas sprints considera características de solo como pH, textura e fertilidade, e nenhuma deve ser apresentada como recomendação agronômica.
+- **Relação com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre o clima de uma região e os requisitos das culturas. Essa proposta foi atendida na **Sprint 1** pelo recomendador de plantio por região. A **Sprint 2** seguiu os requisitos do repositório e implementou o monitoramento de riscos por talhão. O módulo "Compatibilidade (demo)" da interface faz uma ligação simples entre as duas sprints: compara o clima real do município (estação do INMET) com uma **base simulada** de requisitos por cultura. Nenhuma das duas sprints considera características de solo como pH, textura e fertilidade, e nenhuma deve ser apresentada como recomendação agronômica.
 - **Interface** sem testes automatizados no build (validada pelo roteiro com capturas de tela).
 - **Persistência JSON** pensada para uso local por um usuário.
 
@@ -210,7 +252,8 @@ Funcionalidades comprovadamente operacionais (testes automatizados + roteiro na 
 
 Possibilidades não implementadas nesta versão:
 
-- integração com APIs meteorológicas e estações para preencher indicadores automaticamente;
+- consulta online ao INMET (ou outra API) para manter a base atualizada, além da importação do arquivo já incluído;
+- sensores de umidade do solo, que substituiriam a estimativa simulada;
 - sensores IoT de umidade do solo;
 - faixas de referência por cultura e por fase, definidas com apoio agronômico;
 - uso das ocorrências no cálculo, com regra validada;
@@ -220,7 +263,7 @@ Possibilidades não implementadas nesta versão:
 
 ## 13. Conclusão
 
-O SMField chega ao fim da Sprint 2 com duas frentes integradas no mesmo projeto: o recomendador de plantio por região da Sprint 1 e o monitoramento de riscos por talhão da Sprint 2. Este cobre os oito requisitos funcionais do repositório e os quatro complementares da visão do produto, com arquitetura em camadas e persistência local. O projeto tem 171 testes automatizados aprovados e cobertura acima da meta nas camadas de regras de negócio. O cálculo é transparente: o usuário vê não apenas o nível de risco, mas também por que ele foi atribuído — o que torna o painel útil para decidir quais talhões visitar primeiro.
+O SMField chega ao fim da Sprint 2 com duas frentes integradas no mesmo projeto: o recomendador de plantio por região da Sprint 1 e o monitoramento de riscos por talhão da Sprint 2. Este cobre os oito requisitos funcionais do repositório e os quatro complementares da visão do produto, e passou a usar clima real do INMET. O projeto tem arquitetura em camadas, persistência local, 192 testes automatizados aprovados e cobertura acima da meta nas camadas de regras de negócio. O cálculo é transparente: o usuário vê não apenas o nível de risco, mas também por que ele foi atribuído — o que torna o painel útil para decidir quais talhões visitar primeiro.
 
 Para a equipe, o projeto consolidou práticas de qualidade de software: requisitos rastreáveis até classes e testes, regras de negócio isoladas da interface, cenários BDD legíveis, medição real de cobertura e documentação honesta das limitações.
 

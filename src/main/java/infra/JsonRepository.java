@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -42,6 +43,11 @@ public abstract class JsonRepository<T extends Identificavel> {
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
+
+    /** Tentativas de substituir o arquivo de dados antes de informar erro. */
+    static final int TENTATIVAS_GRAVACAO = 8;
+    /** Pausa base entre tentativas (cresce a cada tentativa: 15, 30, 45 ms...). */
+    static final long PAUSA_ENTRE_TENTATIVAS_MS = 15;
 
     private final Path arquivo;
     private final Type tipoArquivo;
@@ -146,19 +152,67 @@ public abstract class JsonRepository<T extends Identificavel> {
     }
 
     private void gravar() {
+        Path temporario = null;
         try {
             Path pasta = arquivo.toAbsolutePath().getParent();
             Files.createDirectories(pasta);
-            Path temporario = Files.createTempFile(pasta, arquivo.getFileName().toString(), ".tmp");
+            temporario = Files.createTempFile(pasta, arquivo.getFileName().toString(), ".tmp");
             Conteudo<T> conteudo = new Conteudo<>();
             conteudo.proximoId = proximoId;
             conteudo.itens = listar();
             try (Writer writer = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8)) {
                 GSON.toJson(conteudo, tipoArquivo, writer);
             }
-            Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            substituir(temporario);
         } catch (IOException e) {
             throw new PersistenciaException("Não foi possível gravar o arquivo de dados " + arquivo + ".", e);
+        } finally {
+            apagarSilenciosamente(temporario);
+        }
+    }
+
+    /**
+     * Troca o arquivo de dados pelo temporário. No Windows, antivírus e indexador de
+     * busca costumam abrir o arquivo por alguns milissegundos logo após cada gravação, o
+     * que faz a troca falhar com "acesso negado" em gravações seguidas (por exemplo, ao
+     * importar dezenas de dias do INMET). Por isso a troca é repetida algumas vezes com
+     * pequenas pausas antes de desistir.
+     */
+    private void substituir(Path temporario) throws IOException {
+        IOException ultimoErro = null;
+        for (int tentativa = 1; tentativa <= TENTATIVAS_GRAVACAO; tentativa++) {
+            try {
+                try {
+                    Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.ATOMIC_MOVE);
+                } catch (AtomicMoveNotSupportedException e) {
+                    Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING);
+                }
+                return;
+            } catch (IOException e) {
+                ultimoErro = e;
+                pausar(tentativa * PAUSA_ENTRE_TENTATIVAS_MS);
+            }
+        }
+        throw ultimoErro;
+    }
+
+    private static void pausar(long milissegundos) {
+        try {
+            Thread.sleep(milissegundos);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static void apagarSilenciosamente(Path temporario) {
+        if (temporario == null) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(temporario);
+        } catch (IOException e) {
+            // O temporário que sobrar é inofensivo: não é lido pelo sistema.
         }
     }
 

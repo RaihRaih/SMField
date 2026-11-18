@@ -1,6 +1,7 @@
 package service;
 
 import infra.ArmazenamentoLocal;
+import infra.InmetRepository;
 
 import java.nio.file.Path;
 import java.time.Clock;
@@ -20,6 +21,7 @@ public class ServicosSMField {
     private final MonitoramentoService monitoramento;
     private final CompatibilidadeService compatibilidade;
     private final DadosDemonstracaoService demonstracao;
+    private final InmetService inmet;
 
     public ServicosSMField(Path diretorioDados, Clock relogio) {
         this.armazenamento = new ArmazenamentoLocal(diretorioDados);
@@ -31,9 +33,10 @@ public class ServicosSMField {
         this.ocorrencias = new OcorrenciaService(armazenamento.talhoes(), armazenamento.ocorrencias(), relogio);
         this.monitoramento = new MonitoramentoService(armazenamento.propriedades(), armazenamento.talhoes(),
                 armazenamento.indicadores(), armazenamento.ocorrencias(), risco);
+        this.inmet = new InmetService(InmetRepository::padrao, talhoes, indicadores, risco);
         this.compatibilidade = new CompatibilidadeService(armazenamento.propriedades(), armazenamento.talhoes(),
-                armazenamento.indicadores());
-        this.demonstracao = new DadosDemonstracaoService(propriedades, talhoes, indicadores, ocorrencias, relogio);
+                armazenamento.indicadores(), inmet);
+        this.demonstracao = new DadosDemonstracaoService(propriedades, talhoes, ocorrencias, inmet);
     }
 
     public ServicosSMField(Path diretorioDados) {
@@ -74,5 +77,10 @@ public class ServicosSMField {
 
     public DadosDemonstracaoService demonstracao() {
         return demonstracao;
+    }
+
+    /** Base real do INMET (carregada na primeira consulta). */
+    public InmetService inmet() {
+        return inmet;
     }
 }

@@ -113,23 +113,23 @@ public class RoteiroGui {
         Object pDet2 = abas2.getComponentAt(4);
         SwingUtilities.invokeAndWait(() -> {
             JComboBox<?> c = (JComboBox<?>) campoSilencioso(pDet2, "comboTalhao");
-            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Café Encosta")) c.setSelectedIndex(i);
+            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Café Catuaí")) c.setSelectedIndex(i);
         });
-        pausa(300); foto("12-consulta-cafe-encosta");
+        pausa(300); foto("12-consulta-cafe-catuai");
         aba(abas2, 5);
         Object pOco = abas2.getComponentAt(5);
         SwingUtilities.invokeAndWait(() -> {
             JComboBox<?> c = (JComboBox<?>) campoSilencioso(pOco, "comboTalhao");
-            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Café Encosta")) c.setSelectedIndex(i);
+            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Café Catuaí")) c.setSelectedIndex(i);
         });
         texto(pOco, "campoDescricao", "Manchas nas folhas observadas na vistoria (teste de interface)");
         clicarEResponder(pOco, "botaoSalvar", "Registro de ocorrência", 0);
         foto("13-ocorrencias");
-        aba(abas2, 7);
-        Object pComp = abas2.getComponentAt(7);
+        aba(abas2, abas2.indexOfTab("Compatibilidade (demo)"));
+        Object pComp = abas2.getComponentAt(abas2.indexOfTab("Compatibilidade (demo)"));
         SwingUtilities.invokeAndWait(() -> {
             JComboBox<?> c = (JComboBox<?>) campoSilencioso(pComp, "comboMunicipio");
-            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Fictício A")) c.setSelectedIndex(i);
+            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Sorriso")) c.setSelectedIndex(i);
             ((JButton) campoSilencioso(pComp, "botaoAvaliar")).doClick();
         });
         pausa(300); foto("14-compatibilidade-demo");

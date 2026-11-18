@@ -55,6 +55,7 @@ public class MainFrame extends JFrame {
         adicionar("Consulta de risco", detalhes);
         adicionar("5. Ocorrências", new OcorrenciasPanel(servicos, aoAlterar));
         adicionar("6. Histórico e alertas", new HistoricoAlertasPanel(servicos));
+        adicionar("Dados reais (INMET)", new InmetPanel(servicos, aoAlterar));
         adicionar("Compatibilidade (demo)", new CompatibilidadePanel(servicos));
         abas.setFont(Estilo.NORMAL.deriveFont(Font.BOLD));
         abas.addChangeListener(e -> {
@@ -101,7 +102,7 @@ public class MainFrame extends JFrame {
         JMenuBar barra = new JMenuBar();
 
         JMenu arquivo = new JMenu("Arquivo");
-        JMenuItem demo = new JMenuItem("Carregar dados de demonstração (SIMULADOS)");
+        JMenuItem demo = new JMenuItem("Carregar dados de demonstração (clima real do INMET)");
         demo.addActionListener(e -> carregarDemonstracao());
         JMenuItem atualizar = new JMenuItem("Atualizar todas as telas");
         atualizar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
@@ -175,8 +176,12 @@ public class MainFrame extends JFrame {
             return;
         }
         int r = JOptionPane.showConfirmDialog(this,
-                "Carregar 3 propriedades, 6 talhões, indicadores e ocorrências FICTÍCIOS?\n"
-                        + "Os registros são marcados como [SIMULADO] — uso acadêmico — e não representam condições reais.",
+                "Carregar a demonstração em três polos do agronegócio, com clima REAL do INMET?\n\n"
+                        + "• Sorriso/MT — soja e milho safrinha (estação A904)\n"
+                        + "• Rio Verde/GO — soja e milho safrinha (estação A025)\n"
+                        + "• Patrocínio/MG — café (estação A523)\n\n"
+                        + "Municípios e clima (temperatura, umidade do ar, chuva) são reais.\n"
+                        + "Propriedades, talhões e ocorrências são fictícios [DEMO]; a umidade do solo é simulada.",
                 "Dados de demonstração", JOptionPane.YES_NO_OPTION);
         if (r == JOptionPane.YES_OPTION && Estilo.executar(this, () -> servicos.demonstracao().carregar())) {
             notificarAlteracao();

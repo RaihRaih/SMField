@@ -50,6 +50,16 @@ class JsonRepositoryTest {
     }
 
     @Test
+    void registrosAntigosSemFonteContinuamLegiveis() throws Exception {
+        Files.writeString(pasta.resolve("indicadores.json"), "{\"proximoId\": 2, \"itens\": [{\"id\": 1, \"talhaoId\": 1, "
+                + "\"umidadeSolo\": 50.0, \"temperatura\": 20.0, \"umidadeAr\": 60.0, \"precipitacao24h\": 10.0, "
+                + "\"dataHora\": \"2026-11-01T08:00\"}]}");
+        IndicadorAmbiental lido = new IndicadorRepository(pasta).listarPorTalhao(1).get(0);
+        assertEquals("Registro manual", lido.getFonte());
+        assertFalse(lido.isDadoInmet());
+    }
+
+    @Test
     void preservaRegistrosAnteriores() {
         IndicadorRepository repo = new IndicadorRepository(pasta);
         repo.salvar(new IndicadorAmbiental(1, 50.0, 20.0, 60.0, 10.0, LocalDateTime.of(2026, 11, 1, 8, 0)));
@@ -63,11 +73,11 @@ class JsonRepositoryTest {
     @Test
     void identificadoresNaoSaoReutilizadosAposExclusao() {
         PropriedadeRepository repo = new PropriedadeRepository(pasta);
-        Propriedade a = repo.salvar(new Propriedade("A", "X"));
-        Propriedade b = repo.salvar(new Propriedade("B", "X"));
+        Propriedade a = repo.salvar(new Propriedade("Fazenda Boa Vista", "Sorriso/MT"));
+        Propriedade b = repo.salvar(new Propriedade("Fazenda Santa Clara", "Sorriso/MT"));
         assertTrue(repo.remover(b.getId()));
         assertFalse(repo.remover(b.getId()));
-        Propriedade c = new PropriedadeRepository(pasta).salvar(new Propriedade("C", "X"));
+        Propriedade c = new PropriedadeRepository(pasta).salvar(new Propriedade("Fazenda Primavera", "Sorriso/MT"));
         assertTrue(c.getId() > b.getId());
         assertEquals(1, a.getId());
     }
@@ -75,15 +85,15 @@ class JsonRepositoryTest {
     @Test
     void atualizaRegistroExistenteSemDuplicar() {
         PropriedadeRepository repo = new PropriedadeRepository(pasta);
-        Propriedade a = repo.salvar(new Propriedade("A", "X"));
-        a.alterar("A2", "X2");
+        Propriedade a = repo.salvar(new Propriedade("Fazenda Boa Vista", "Sorriso/MT"));
+        a.alterar("Fazenda Boa Vista II", "Lucas do Rio Verde/MT");
         repo.salvar(a);
         assertEquals(1, repo.contar());
-        assertEquals("A2", new PropriedadeRepository(pasta).buscarPorId(a.getId()).orElseThrow().getNome());
-        repo.salvar(new Propriedade(10, "Importada", "Y"));
-        assertEquals(11, repo.salvar(new Propriedade("Nova", "Y")).getId());
-        assertTrue(repo.existeComNomeEMunicipio("importada", "y", 0));
-        assertFalse(repo.existeComNomeEMunicipio("importada", "y", 10));
+        assertEquals("Fazenda Boa Vista II", new PropriedadeRepository(pasta).buscarPorId(a.getId()).orElseThrow().getNome());
+        repo.salvar(new Propriedade(10, "Fazenda Importada", "Rio Verde/GO"));
+        assertEquals(11, repo.salvar(new Propriedade("Fazenda Nova", "Rio Verde/GO")).getId());
+        assertTrue(repo.existeComNomeEMunicipio("fazenda importada", "rio verde/go", 0));
+        assertFalse(repo.existeComNomeEMunicipio("fazenda importada", "rio verde/go", 10));
     }
 
     @Test
@@ -110,7 +120,7 @@ class JsonRepositoryTest {
         Path arquivoNoLugarDaPasta = pasta.resolve("ocupado");
         Files.writeString(arquivoNoLugarDaPasta, "x");
         PropriedadeRepository repo = new PropriedadeRepository(arquivoNoLugarDaPasta);
-        assertThrows(PersistenciaException.class, () -> repo.salvar(new Propriedade("A", "B")));
+        assertThrows(PersistenciaException.class, () -> repo.salvar(new Propriedade("Fazenda Boa Vista", "Sorriso/MT")));
     }
 
     @Test
@@ -127,6 +137,16 @@ class JsonRepositoryTest {
             } else {
                 System.setProperty(ArmazenamentoLocal.PROPRIEDADE_DIRETORIO, anterior);
             }
+        }
+    }
+
+    @Test
+    void falhaPersistenteNaTrocaDoArquivoGeraErroClaroSemDeixarTemporario() throws Exception {
+        PropriedadeRepository repo = new PropriedadeRepository(pasta);
+        Files.createDirectories(pasta.resolve("propriedades.json").resolve("conteudo"));
+        assertThrows(PersistenciaException.class, () -> repo.salvar(new Propriedade("Fazenda Boa Vista", "Sorriso/MT")));
+        try (var arquivos = Files.list(pasta)) {
+            assertTrue(arquivos.noneMatch(f -> f.getFileName().toString().endsWith(".tmp")));
         }
     }
 }

@@ -14,6 +14,8 @@ import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.E;
 import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
+import service.ConversorEntrada;
+import service.InmetService;
 import service.MonitoramentoService;
 import service.ServicosSMField;
 
@@ -51,6 +53,7 @@ public class SMFieldSteps {
     private NivelRisco nivelClassificado;
     private Double umidadeSoloInformada;
     private List<MonitoramentoService.ItemPainel> painel;
+    private InmetService.ResultadoImportacao importacao;
     private LocalDateTime proximoHorario = LocalDateTime.now(RELOGIO).minusDays(1);
 
     @Dado("um sistema SMField sem dados cadastrados")
@@ -136,7 +139,7 @@ public class SMFieldSteps {
 
     @Dado("um talhão {string} de cultura {string} na propriedade {string}")
     public void umTalhao(String nome, String cultura, String nomePropriedade) {
-        propriedade = servicos.propriedades().cadastrar(nomePropriedade, "Município Fictício");
+        propriedade = servicos.propriedades().cadastrar(nomePropriedade, "Sorriso/MT");
         talhao = servicos.talhoes().cadastrar(propriedade.getId(), nome, 10.0, cultura);
     }
 
@@ -235,7 +238,7 @@ public class SMFieldSteps {
 
     @Dado("os seguintes talhões e indicadores na propriedade {string}:")
     public void talhoesComIndicadores(String nomePropriedade, DataTable tabela) {
-        propriedade = servicos.propriedades().cadastrar(nomePropriedade, "Município Fictício");
+        propriedade = servicos.propriedades().cadastrar(nomePropriedade, "Sorriso/MT");
         for (Map<String, String> linha : tabela.asMaps()) {
             Talhao t = servicos.talhoes().cadastrar(propriedade.getId(), linha.get("talhao"), 5.0, linha.get("cultura"));
             registrar(t, Double.parseDouble(linha.get("solo")), Double.parseDouble(linha.get("temperatura")),
@@ -291,5 +294,54 @@ public class SMFieldSteps {
         assertTrue(ultimo.mudouClassificacao());
         assertEquals(NivelRisco.valueOf(de), ultimo.nivelAnterior());
         assertEquals(NivelRisco.valueOf(para), ultimo.resultado().getNivel());
+    }
+
+    // ------------------------------------------------------------------ INMET
+
+    @Quando("importar os dados da estação {string} de {string} a {string} para o talhão")
+    public void importarInmet(String estacao, String inicio, String fim) {
+        importacao = servicos.inmet().importar(talhao.getId(), estacao, ConversorEntrada.data(inicio),
+                ConversorEntrada.data(fim));
+    }
+
+    @Dado("que os dados da estação {string} de {string} a {string} já foram importados para o talhão")
+    public void jaImportado(String estacao, String inicio, String fim) {
+        importarInmet(estacao, inicio, fim);
+    }
+
+    @Entao("o talhão deverá ter {int} registros de indicadores vindos do INMET")
+    public void registrosInmet(int quantidade) {
+        assertEquals(quantidade, importacao.importados());
+        assertEquals(quantidade, servicos.indicadores().listarPorTalhao(talhao.getId()).stream()
+                .filter(domain.IndicadorAmbiental::isDadoInmet).count());
+    }
+
+    @E("a temperatura registrada em {string} deverá ser {double}")
+    public void temperaturaRegistrada(String data, double esperada) {
+        java.time.LocalDate dia = ConversorEntrada.data(data);
+        domain.IndicadorAmbiental registro = servicos.indicadores().listarPorTalhao(talhao.getId()).stream()
+                .filter(i -> i.getDataHora().toLocalDate().equals(dia)).findFirst().orElseThrow();
+        assertEquals(esperada, registro.getTemperatura(), 1e-9);
+    }
+
+    @E("a umidade do solo dos registros deverá estar identificada como simulada")
+    public void soloSimulado() {
+        assertTrue(servicos.indicadores().listarPorTalhao(talhao.getId()).stream()
+                .allMatch(i -> i.getFonte().contains("umidade do solo SIMULADA")));
+    }
+
+    @E("todos os registros importados deverão ter risco calculado")
+    public void riscoCalculado() {
+        List<RegistroHistorico> h = servicos.monitoramento().historico(talhao.getId());
+        assertFalse(h.isEmpty());
+        assertTrue(h.stream().allMatch(r -> r.resultado().isCalculado()
+                && r.resultado().getNivel() == NivelRisco.classificar(r.resultado().getIndice())));
+    }
+
+    @Entao("nenhum novo registro deverá ser criado e {int} dias deverão ser informados como já importados")
+    public void naoDuplica(int dias) {
+        assertEquals(0, importacao.importados());
+        assertEquals(dias, importacao.jaExistentes());
+        assertEquals(dias, servicos.indicadores().listarPorTalhao(talhao.getId()).size());
     }
 }

@@ -42,11 +42,12 @@
 - Registro de indicadores ambientais com validação
 - Índice de risco 0–100, classificação por cores e justificativa
 - Histórico, alertas e ocorrências de campo
+- Clima **real** de 634 estações do INMET (jan–out/2026)
 
 **Elemento visual:** captura `13-consulta-justificativa-registro-2.png`.
 
 **Fala sugerida (≈30 s)**
-"O SMField centraliza tudo: propriedades, talhões, indicadores e ocorrências. A cada registro, o sistema calcula o risco, classifica como baixo, médio ou alto e escreve a justificativa — por exemplo, 'umidade do solo muito abaixo da faixa de referência'. E guarda o histórico, para acompanharmos a evolução."
+"O SMField centraliza tudo: propriedades, talhões, indicadores e ocorrências. A cada registro, o sistema calcula o risco, classifica como baixo, médio ou alto e escreve a justificativa — por exemplo, 'umidade do solo muito abaixo da faixa de referência'. E guarda o histórico, para acompanharmos a evolução. Além disso, o sistema importa clima real do INMET: temperatura, umidade do ar e chuva medidas de verdade em 634 estações. Só a umidade do solo, que o INMET não mede, é estimada."
 
 ---
 
@@ -81,14 +82,14 @@
 
 **Texto do slide**
 - Arquitetura em 4 camadas: domain · service · infra · ui
-- 171 testes automatizados aprovados (JUnit 5 das duas sprints + 15 cenários Cucumber em português)
+- 192 testes automatizados aprovados (JUnit 5 das duas sprints + 17 cenários Cucumber em português)
 - Cobertura medida com JaCoCo: 99,2% em service e 98,9% em domain
 - Build único: `mvn clean verify`
 
 **Elemento visual:** diagrama das camadas + print do relatório JaCoCo (`target/site/jacoco/index.html`) + trecho de um `.feature`.
 
 **Fala sugerida (≈35 s)**
-"Por trás da interface, separamos o sistema em quatro camadas: a interface não faz cálculo nenhum, só chama os serviços. Isso permitiu testar as regras de verdade: são 171 testes automatizados, todos passando, somando as duas sprints, incluindo 15 cenários de comportamento escritos em português com Cucumber. A cobertura das regras de negócio passa de 98%, e o próprio build falha se ela cair abaixo de 80%. A interface não tem testes automatizados; validamos o roteiro completo nela com capturas de tela."
+"Por trás da interface, separamos o sistema em quatro camadas: a interface não faz cálculo nenhum, só chama os serviços. Isso permitiu testar as regras de verdade: são 192 testes automatizados, todos passando, somando as duas sprints, incluindo 17 cenários de comportamento escritos em português com Cucumber. A cobertura das regras de negócio passa de 98%, e o próprio build falha se ela cair abaixo de 80%. A interface não tem testes automatizados; validamos o roteiro completo nela com capturas de tela."
 
 ---
 
@@ -127,9 +128,11 @@
 | 7 | Aba **Consulta de risco**. | Ler a justificativa e mostrar a tabela de pontos por indicador. |
 | 8 | Aba **6. Histórico e alertas**. | "As duas medições estão preservadas, e o sistema avisou a mudança de baixo para alto." |
 | 9 | Fechar e abrir novamente o programa; ir ao **Dashboard**. | "Os dados continuam lá: ficam gravados em arquivos locais." |
-| 10 | Menu **Arquivo > Carregar dados de demonstração** e voltar ao Dashboard. | "Com dados simulados vemos vários talhões ordenados do maior para o menor risco." |
+| 10 | Menu **Arquivo > Carregar dados de demonstração** e voltar ao Dashboard. | "Agora com polos reais do agronegócio e clima real do INMET: Sorriso, Rio Verde e Patrocínio. No topo, em vermelho, o milho safrinha de Rio Verde no fim da seca de agosto, com solo seco e ar abaixo de 30%." |
+| 10b | Aba **Dados reais (INMET)**: buscar "Belo Horizonte", período 01/10/2026 a 31/10/2026, **Visualizar prévia** e **Importar para o talhão**. | "Estes são dados reais do INMET: temperatura, umidade do ar e chuva de outubro em Belo Horizonte. Só a umidade do solo é simulada, e isso fica registrado na fonte de cada medição." |
+| 10c | Aba **Compatibilidade (demo)**, município Sorriso/MT, **Avaliar compatibilidade**. | "Com o clima real de Sorriso, a base simulada aponta milho, soja e feijão como compatíveis, coerente com a vocação da região." |
 | 11 (opcional) | No terminal: `java -cp target/smfield.jar smfield.Main agora --regiao "Belo Horizonte" --mes 10` | "E este é o recomendador da Sprint 1: ele sugere o que plantar em cada região e mês. Continua funcionando no mesmo projeto." |
 
-**Valores fictícios:** os números usados para "Contagem" e os dados [SIMULADO] servem apenas para demonstração e não representam condições reais.
+**O que é real e o que é fictício:** os números digitados para "Contagem" são fictícios. Na demonstração, os municípios e o clima são reais (INMET), enquanto as propriedades, os talhões e as ocorrências [DEMO] são fictícios, e a umidade do solo é simulada.
 
 **Plano B:** se o computador da apresentação não abrir o programa, usar as capturas de `docs/evidencias/telas/` na ordem 01 → 03 → 05 → 09 → 12 → 13 → 14 → 15 → 16.

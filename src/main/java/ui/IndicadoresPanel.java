@@ -37,7 +37,7 @@ public class IndicadoresPanel extends JPanel implements Atualizavel {
     private final ResultadoRiscoView resultado = new ResultadoRiscoView();
 
     private final DefaultTableModel modelo = Estilo.modelo("Data/hora", "Solo (%)", "Temp. (°C)", "Ar (%)",
-            "Precip. 24 h (mm)", "Índice", "Classificação");
+            "Precip. 24 h (mm)", "Índice", "Classificação", "Fonte dos dados");
     private final JTable tabela = Estilo.tabela(modelo);
     private final JLabel aviso = Estilo.nota(" ");
 
@@ -158,7 +158,7 @@ public class IndicadoresPanel extends JPanel implements Atualizavel {
             ResultadoRisco r = servicos.risco().calcular(ind);
             modelo.addRow(new Object[]{Estilo.formatar(ind.getDataHora()), Estilo.numero(ind.getUmidadeSolo()),
                     Estilo.numero(ind.getTemperatura()), Estilo.numero(ind.getUmidadeAr()),
-                    Estilo.numero(ind.getPrecipitacao24h()), r.getIndice(), r.getNivel()});
+                    Estilo.numero(ind.getPrecipitacao24h()), r.getIndice(), r.getNivel(), ind.getFonte()});
         }
         aviso.setText(lista.isEmpty() ? "Este talhão ainda não possui indicadores registrados (risco NÃO CALCULADO)."
                 : lista.size() + " registro(s). Os registros anteriores são preservados no histórico.");

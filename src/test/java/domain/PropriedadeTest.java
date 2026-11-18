@@ -39,17 +39,19 @@ class PropriedadeTest {
 
     @Test
     void alterarAplicaAsMesmasValidacoes() {
-        Propriedade p = new Propriedade(1, "A", "B");
-        p.alterar("C", "D");
-        assertEquals("C", p.getNome());
-        assertThrows(ValidacaoException.class, () -> p.alterar(" ", "D"));
-        assertEquals("C", p.getNome());
+        Propriedade p = new Propriedade(1, "Fazenda Boa Vista", "Sorriso/MT");
+        p.alterar("Sítio Primavera", "Patrocínio/MG");
+        assertEquals("Sítio Primavera", p.getNome());
+        assertEquals("Patrocínio/MG", p.getMunicipio());
+        assertThrows(ValidacaoException.class, () -> p.alterar(" ", "Patrocínio/MG"));
+        assertEquals("Sítio Primavera", p.getNome());
     }
 
     @Test
     void igualdadePorIdentificador() {
-        assertEquals(new Propriedade(5, "A", "B"), new Propriedade(5, "X", "Y"));
-        assertNotEquals(new Propriedade(5, "A", "B"), new Propriedade(6, "A", "B"));
-        assertEquals(new Propriedade(5, "A", "B").hashCode(), new Propriedade(5, "Z", "Z").hashCode());
+        assertEquals(new Propriedade(5, "Fazenda Boa Vista", "Sorriso/MT"), new Propriedade(5, "Fazenda Santa Clara", "Rio Verde/GO"));
+        assertNotEquals(new Propriedade(5, "Fazenda Boa Vista", "Sorriso/MT"), new Propriedade(6, "Fazenda Boa Vista", "Sorriso/MT"));
+        assertEquals(new Propriedade(5, "Fazenda Boa Vista", "Sorriso/MT").hashCode(),
+                new Propriedade(5, "Sítio Primavera", "Patrocínio/MG").hashCode());
     }
 }

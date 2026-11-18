@@ -17,6 +17,9 @@ public class IndicadorAmbiental implements Identificavel {
     /** Limite superior de plausibilidade para precipitação acumulada em 24 h. */
     public static final double PRECIPITACAO_MAX = 500;
 
+    public static final String FONTE_MANUAL = "Registro manual";
+    public static final String PREFIXO_INMET = "INMET";
+
     private long id;
     private long talhaoId;
     private double umidadeSolo;
@@ -24,9 +27,19 @@ public class IndicadorAmbiental implements Identificavel {
     private double umidadeAr;
     private double precipitacao24h;
     private LocalDateTime dataHora;
+    /** Origem dos valores; {@code null} em registros manuais (inclusive os gravados antes deste campo existir). */
+    private String fonte;
 
     public IndicadorAmbiental(long talhaoId, Double umidadeSolo, Double temperatura,
                               Double umidadeAr, Double precipitacao24h, LocalDateTime dataHora) {
+        this(talhaoId, umidadeSolo, temperatura, umidadeAr, precipitacao24h, dataHora, null);
+    }
+
+    /**
+     * @param fonte descrição da origem dos dados (ex.: estação INMET); {@code null} para registro manual
+     */
+    public IndicadorAmbiental(long talhaoId, Double umidadeSolo, Double temperatura,
+                              Double umidadeAr, Double precipitacao24h, LocalDateTime dataHora, String fonte) {
         if (talhaoId <= 0) {
             throw new ValidacaoException("Selecione um talhão cadastrado.");
         }
@@ -40,6 +53,7 @@ public class IndicadorAmbiental implements Identificavel {
         this.precipitacao24h = Validacao.numeroNoIntervalo(precipitacao24h, PRECIPITACAO_MIN, PRECIPITACAO_MAX,
                 "Precipitação (24 h)", "mm");
         this.dataHora = dataHora.withSecond(0).withNano(0);
+        this.fonte = fonte == null || fonte.isBlank() ? null : fonte.trim();
     }
 
     @Override
@@ -74,5 +88,15 @@ public class IndicadorAmbiental implements Identificavel {
 
     public LocalDateTime getDataHora() {
         return dataHora;
+    }
+
+    /** Origem legível dos dados: "Registro manual" ou a descrição da importação. */
+    public String getFonte() {
+        return fonte == null ? FONTE_MANUAL : fonte;
+    }
+
+    /** Verdadeiro quando temperatura, umidade do ar e chuva vieram de uma estação real do INMET. */
+    public boolean isDadoInmet() {
+        return fonte != null && fonte.startsWith(PREFIXO_INMET);
     }
 }

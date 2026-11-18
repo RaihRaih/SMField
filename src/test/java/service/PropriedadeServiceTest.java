@@ -51,11 +51,11 @@ class PropriedadeServiceTest {
 
     @Test
     void editarEExcluir() {
-        Propriedade p = s.propriedades().cadastrar("A", "B");
-        Propriedade q = s.propriedades().cadastrar("C", "D");
-        s.propriedades().editar(p.getId(), "A2", "B2");
-        assertEquals("A2", s.propriedades().obter(p.getId()).getNome());
-        assertThrows(ValidacaoException.class, () -> s.propriedades().editar(p.getId(), "C", "D"));
+        Propriedade p = s.propriedades().cadastrar("Fazenda Boa Vista", "Sorriso/MT");
+        Propriedade q = s.propriedades().cadastrar("Fazenda Santa Clara", "Rio Verde/GO");
+        s.propriedades().editar(p.getId(), "Fazenda Boa Vista II", "Lucas do Rio Verde/MT");
+        assertEquals("Fazenda Boa Vista II", s.propriedades().obter(p.getId()).getNome());
+        assertThrows(ValidacaoException.class, () -> s.propriedades().editar(p.getId(), "Fazenda Santa Clara", "Rio Verde/GO"));
         s.propriedades().excluir(q.getId());
         assertTrue(s.propriedades().buscar(q.getId()).isEmpty());
         assertThrows(ValidacaoException.class, () -> s.propriedades().obter(999));
@@ -63,7 +63,7 @@ class PropriedadeServiceTest {
 
     @Test
     void naoExcluiPropriedadeComTalhoes() {
-        Propriedade p = s.propriedades().cadastrar("A", "B");
+        Propriedade p = s.propriedades().cadastrar("Fazenda Boa Vista", "Sorriso/MT");
         s.talhoes().cadastrar(p.getId(), "T1", 1.0, "Milho");
         ValidacaoException e = assertThrows(ValidacaoException.class, () -> s.propriedades().excluir(p.getId()));
         assertTrue(e.getMessage().contains("talhão"));

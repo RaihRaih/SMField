@@ -1,0 +1,194 @@
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.List;
+
+/** Valida a aba "Dados reais (INMET)" clicando nos componentes reais. */
+public class RoteiroInmet {
+    static PrintWriter log;
+    static Robot robot;
+    static int shot = 0;
+
+    public static void main(String[] a) throws Exception {
+        log = new PrintWriter(new FileWriter("/tmp/gui2/log.txt"), true);
+        robot = new Robot();
+        Path dados = Path.of(System.getProperty("smfield.dados"));
+        service.ServicosSMField pre = new service.ServicosSMField(dados);
+        domain.Propriedade p = pre.propriedades().cadastrar("Fazenda Modelo", "Contagem");
+        pre.talhoes().cadastrar(p.getId(), "Talhão A", 12.0, "Milho");
+        ui.AppMain.main(new String[0]);
+        JFrame f = esperarFrame();
+        SwingUtilities.invokeAndWait(() -> { f.setSize(1366, 850); f.setLocation(0, 0); });
+        JTabbedPane abas = (JTabbedPane) campo(f, "abas");
+        int idx = abas.indexOfTab("Dados reais (INMET)");
+        log.println("Aba INMET no índice " + idx + " de " + abas.getTabCount());
+        Object pin = abas.getComponentAt(idx);
+        aba(abas, idx);
+        for (int i = 0; i < 100 && !(Boolean) campo(pin, "baseCarregada"); i++) pausa(100);
+        pausa(500);
+        log.println("Base carregada: " + campo(pin, "baseCarregada") + " | info: " + ((JLabel) campo(pin, "infoEstacao")).getText());
+        log.println("Estações no combo (Contagem sem estação): " + ((JComboBox<?>) campo(pin, "comboEstacao")).getItemCount());
+        foto("01-aba-inmet-inicial");
+
+        texto(pin, "campoBusca", "Belo Horizonte");
+        SwingUtilities.invokeAndWait(() -> ((JButton) campoSilencioso(pin, "botaoBuscar")).doClick());
+        pausa(300);
+        JComboBox<?> est = (JComboBox<?>) campo(pin, "comboEstacao");
+        log.println("Busca 'Belo Horizonte': " + est.getItemCount() + " estações; selecionada: " + est.getSelectedItem());
+        SwingUtilities.invokeAndWait(() -> { for (int i = 0; i < est.getItemCount(); i++) if (est.getItemAt(i).toString().startsWith("A521")) est.setSelectedIndex(i); });
+        pausa(300);
+        log.println("Info: " + ((JLabel) campo(pin, "infoEstacao")).getText());
+        log.println("Período sugerido: " + ((JTextField) campo(pin, "campoInicio")).getText() + " a " + ((JTextField) campo(pin, "campoFim")).getText());
+        texto(pin, "campoInicio", "01/10/2026");
+        SwingUtilities.invokeAndWait(() -> ((JButton) campoSilencioso(pin, "botaoPrevia")).doClick());
+        pausa(400);
+        JTable prev = (JTable) campo(pin, "tabela");
+        log.println("Prévia: " + prev.getRowCount() + " linhas | " + ((JLabel) campo(pin, "resumo")).getText());
+        for (int r = 0; r < 5; r++) log.println("   " + linhaT(prev, r));
+        foto("02-previa-a521-outubro");
+
+        texto(pin, "campoInicio", "31/10/2026"); texto(pin, "campoFim", "01/10/2026");
+        clicarEResponder(pin, "botaoPrevia", "ERRO período invertido", 0);
+        texto(pin, "campoInicio", "01/01/2026"); texto(pin, "campoFim", "31/10/2026");
+        clicarEResponder(pin, "botaoImportar", "ERRO período longo", 0);
+        texto(pin, "campoInicio", "01/10/2026"); texto(pin, "campoFim", "31/10/2026");
+        clicarEResponder(pin, "botaoImportar", "Importação outubro A521", 0);
+        foto("03-apos-importar");
+        clicarEResponder(pin, "botaoImportar", "Importação repetida", 0);
+
+        aba(abas, abas.indexOfTab("Consulta de risco"));
+        foto("04-consulta-talhao-com-inmet");
+        Object pHist = abas.getComponentAt(abas.indexOfTab("6. Histórico e alertas"));
+        aba(abas, abas.indexOfTab("6. Histórico e alertas"));
+        JTable th = (JTable) campo(pHist, "tabelaHistorico");
+        log.println("Histórico Talhão A: " + th.getRowCount() + " | último: " + linhaT(th, th.getRowCount() - 1));
+        foto("05-historico-talhao-inmet");
+
+        Method m = f.getClass().getDeclaredMethod("carregarDemonstracao"); m.setAccessible(true);
+        SwingUtilities.invokeLater(() -> { try { m.invoke(f); } catch (Exception e) { e.printStackTrace(); } });
+        responder("Confirmação demo", 0);
+        responder("Demo concluída", 0);
+        pausa(500);
+        foto("06-dashboard-demo");
+        Object dash = abas.getComponentAt(0);
+        JTable td = (JTable) campo(dash, "tabela");
+        for (int r = 0; r < td.getRowCount(); r++) log.println("   " + linhaT(td, r));
+        aba(abas, abas.indexOfTab("6. Histórico e alertas"));
+        SwingUtilities.invokeAndWait(() -> {
+            JComboBox<?> c = (JComboBox<?>) campoSilencioso(pHist, "comboTalhao");
+            for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Santa Helena") && c.getItemAt(i).toString().contains("Milho")) c.setSelectedIndex(i);
+        });
+        pausa(400);
+        log.println("Histórico Milho Safrinha Rio Verde: " + th.getRowCount() + " registros; alertas: " + ((JTable) campo(pHist, "tabelaAlertas")).getRowCount());
+        foto("07-historico-rio-verde");
+        aba(abas, abas.indexOfTab("4. Indicadores ambientais"));
+        foto("08-indicadores-coluna-fonte");
+        log.println("FIM OK");
+        log.close();
+        System.exit(0);
+    }
+
+    static String linhaT(JTable t, int r) {
+        StringBuilder sb = new StringBuilder();
+        for (int c = 0; c < t.getColumnCount(); c++) sb.append(t.getValueAt(r, c)).append(" | ");
+        return sb.toString();
+    }
+
+    static void preencherIndicadores(Object p, String solo, String t, String ar, String prec) throws Exception {
+        texto(p, "campoSolo", solo); texto(p, "campoTemperatura", t); texto(p, "campoAr", ar); texto(p, "campoPrecipitacao", prec);
+    }
+
+    static int linhas(Object painel) throws Exception { return ((JTable) campo(painel, "tabela")).getRowCount(); }
+
+    static String linha(Object painel, int r) throws Exception {
+        JTable t = (JTable) campo(painel, "tabela");
+        StringBuilder sb = new StringBuilder();
+        for (int c = 0; c < t.getColumnCount(); c++) sb.append(t.getValueAt(r, c)).append(" | ");
+        return sb.toString();
+    }
+
+    static void aba(JTabbedPane abas, int i) throws Exception {
+        SwingUtilities.invokeAndWait(() -> abas.setSelectedIndex(i));
+        pausa(400);
+    }
+
+    static void texto(Object p, String nome, String v) throws Exception {
+        Object c = campo(p, nome);
+        SwingUtilities.invokeAndWait(() -> ((javax.swing.text.JTextComponent) c).setText(v));
+    }
+
+    static void clicarEResponder(Object p, String botao, String rotulo, int opcao) throws Exception {
+        JButton b = (JButton) campo(p, botao);
+        SwingUtilities.invokeLater(b::doClick);
+        responder(rotulo, opcao);
+    }
+
+    /** Espera um diálogo modal, registra título e mensagem, tira foto e clica na opção indicada. */
+    static void responder(String rotulo, int opcao) throws Exception {
+        JDialog d = null;
+        for (int i = 0; i < 60 && d == null; i++) {
+            pausa(100);
+            for (Window w : Window.getWindows()) if (w instanceof JDialog jd && jd.isShowing()) d = jd;
+        }
+        if (d == null) { log.println("[" + rotulo + "] nenhum diálogo apareceu!"); return; }
+        pausa(300);
+        JOptionPane op = achar(d.getContentPane(), JOptionPane.class);
+        String msg = op == null ? "?" : String.valueOf(op.getMessage()).replace('\n', ' ');
+        log.println("[" + rotulo + "] " + d.getTitle() + " :: " + msg);
+        foto("dlg-" + rotulo.replaceAll("[^A-Za-z0-9]+", "_"));
+        List<JButton> botoes = new ArrayList<>();
+        coletar(d.getContentPane(), JButton.class, botoes);
+        JButton alvo = botoes.get(Math.min(opcao, botoes.size() - 1));
+        SwingUtilities.invokeLater(alvo::doClick);
+        pausa(500);
+    }
+
+    static <T> T achar(Container c, Class<T> tipo) {
+        for (Component x : c.getComponents()) {
+            if (tipo.isInstance(x)) return tipo.cast(x);
+            if (x instanceof Container cc) { T r = achar(cc, tipo); if (r != null) return r; }
+        }
+        return null;
+    }
+
+    static <T> void coletar(Container c, Class<T> tipo, List<T> out) {
+        for (Component x : c.getComponents()) {
+            if (tipo.isInstance(x)) out.add(tipo.cast(x));
+            if (x instanceof Container cc) coletar(cc, tipo, out);
+        }
+    }
+
+    static Object campo(Object o, String nome) throws Exception {
+        Class<?> c = o.getClass();
+        while (c != null) {
+            try { Field f = c.getDeclaredField(nome); f.setAccessible(true); return f.get(o); }
+            catch (NoSuchFieldException e) { c = c.getSuperclass(); }
+        }
+        throw new NoSuchFieldException(nome);
+    }
+
+    static Object campoSilencioso(Object o, String nome) {
+        try { return campo(o, nome); } catch (Exception e) { throw new RuntimeException(e); }
+    }
+
+    static JFrame esperarFrame() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            for (Frame fr : Frame.getFrames()) if (fr instanceof JFrame jf && jf.isShowing()) return jf;
+            pausa(100);
+        }
+        throw new IllegalStateException("janela não abriu");
+    }
+
+    static void foto(String nome) throws Exception {
+        pausa(250);
+        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+        ImageIO.write(robot.createScreenCapture(new Rectangle(0, 0, Math.min(d.width, 1366), Math.min(d.height, 850))),
+                "png", new File(String.format("/tmp/gui2/%02d-%s.png", shot++, nome)));
+    }
+
+    static void pausa(long ms) { try { Thread.sleep(ms); } catch (InterruptedException e) { } }
+}

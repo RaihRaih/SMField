@@ -9,20 +9,20 @@
 Dashboard linhas: 1
 [Registro 2 de indicadores] SMField :: Indicadores registrados. Índice de risco: 68 (ALTO).
 Histórico linhas: 2 | Alertas: 2
-Após reabrir — dashboard linhas: 1 | primeira linha: 1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 11:13 | 
-[Confirmação carga demo] Dados de demonstração :: Carregar 3 propriedades, 6 talhões, indicadores e ocorrências FICTÍCIOS? Os registros são marcados como [SIMULADO] — uso acadêmico — e não representam condições reais.
+Após reabrir — dashboard linhas: 1 | primeira linha: 1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 21:58 | 
+[Confirmação carga demo] Dados de demonstração :: Carregar a demonstração em três polos do agronegócio, com clima REAL do INMET?  • Sorriso/MT — soja e milho safrinha (estação A904) • Rio Verde/GO — soja e milho safrinha (estação A025) • Patrocínio/MG — café (estação A523)  Municípios e clima (temperatura, umidade do ar, chuva) são reais. Propriedades, talhões e ocorrências são fictícios [DEMO]; a umidade do solo é simulada.
 [Carga demo concluída] SMField :: Dados de demonstração carregados.
 Dashboard demo linhas: 7
-   4 | [SIMULADO] Sítio Santa Luzia | Talhão Café Encosta | Café | 8 | 90 | Alto | 17/11/2026 09:00 | 
-   1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 11:13 | 
-   5 | [SIMULADO] Sítio Santa Luzia | Talhão Milho Baixada | Milho | 10 | 63 | Médio | 17/11/2026 05:00 | 
-   3 | [SIMULADO] Fazenda Boa Vista | Talhão Soja Sul | Soja | 25,5 | 50 | Médio | 17/11/2026 06:00 | 
-   2 | [SIMULADO] Fazenda Boa Vista | Talhão Milho Norte | Milho | 12 | 0 | Baixo | 17/11/2026 08:00 | 
-   6 | [SIMULADO] Fazenda Serra Azul | Talhão Soja Platô | Soja | 30 | 0 | Baixo | 17/11/2026 07:00 | 
-   7 | [SIMULADO] Fazenda Serra Azul | Talhão Café Novo | Café | 6 | — | Não calculado | — | 
-Alertas demo: 6
+   5 | [DEMO] Fazenda Santa Helena | Talhão Milho Safrinha | Milho | 60 | 68 | Alto | 31/08/2026 12:00 | 
+   1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 21:58 | 
+   4 | [DEMO] Fazenda Santa Helena | Talhão Soja | Soja | 80 | 53 | Médio | 31/10/2026 12:00 | 
+   3 | [DEMO] Fazenda Boa Esperança | Talhão Milho Safrinha | Milho | 95 | 45 | Médio | 30/06/2026 12:00 | 
+   2 | [DEMO] Fazenda Boa Esperança | Talhão Soja 26/27 | Soja | 120 | 28 | Baixo | 31/10/2026 12:00 | 
+   6 | [DEMO] Sítio Cerrado Mineiro | Talhão Café Catuaí | Café | 15 | 8 | Baixo | 31/10/2026 12:00 | 
+   7 | [DEMO] Sítio Cerrado Mineiro | Talhão Café Novo | Café | 5 | — | Não calculado | — | 
+Alertas demo: 7
 [Registro de ocorrência] SMField :: Ocorrência registrada com sucesso.
-Compatibilidade: 2 cultura(s) potencialmente compatível(is) segundo a base simulada.
+Compatibilidade: 3 cultura(s) potencialmente compatível(is) segundo a base simulada.
 [Edição de talhão (área 14,5)] SMField :: Talhão alterado com sucesso.
 Talhão A após edição: área 14,5
 [Confirmação de exclusão (respondendo NÃO)] Confirmar exclusão :: Excluir o talhão "Talhão A"?  Também serão removidos 2 registro(s) de indicadores (histórico) e 0 ocorrência(s) vinculados a ele. Esta ação não pode ser desfeita.

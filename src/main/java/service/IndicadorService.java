@@ -34,6 +34,17 @@ public class IndicadorService {
      */
     public IndicadorAmbiental registrar(long talhaoId, Double umidadeSolo, Double temperatura,
                                         Double umidadeAr, Double precipitacao24h, LocalDateTime dataHora) {
+        return registrar(talhaoId, umidadeSolo, temperatura, umidadeAr, precipitacao24h, dataHora, null);
+    }
+
+    /**
+     * Registra os indicadores informando a origem dos dados (ex.: importação do INMET).
+     *
+     * @param fonte descrição da origem; {@code null} para registro manual
+     */
+    public IndicadorAmbiental registrar(long talhaoId, Double umidadeSolo, Double temperatura,
+                                        Double umidadeAr, Double precipitacao24h, LocalDateTime dataHora,
+                                        String fonte) {
         if (!talhoes.existe(talhaoId)) {
             throw new ValidacaoException("Selecione um talhão cadastrado.");
         }
@@ -59,7 +70,7 @@ public class IndicadorService {
             throw new ValidacaoException("A data e hora do registro não pode estar no futuro.");
         }
         IndicadorAmbiental registro = new IndicadorAmbiental(talhaoId, umidadeSolo, temperatura, umidadeAr,
-                precipitacao24h, dataHora);
+                precipitacao24h, dataHora, fonte);
         return indicadores.salvar(registro);
     }
 

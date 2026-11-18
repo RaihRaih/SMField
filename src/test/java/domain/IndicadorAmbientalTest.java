@@ -28,6 +28,17 @@ class IndicadorAmbientalTest {
     }
 
     @Test
+    void fonteDosDados() {
+        IndicadorAmbiental manual = criar(55.0, 24.0, 65.0, 12.0);
+        assertEquals(IndicadorAmbiental.FONTE_MANUAL, manual.getFonte());
+        assertTrue(!manual.isDadoInmet());
+        IndicadorAmbiental inmet = new IndicadorAmbiental(1, 55.0, 24.0, 65.0, 12.0, DATA, " INMET A521 (BH) ");
+        assertEquals("INMET A521 (BH)", inmet.getFonte());
+        assertTrue(inmet.isDadoInmet());
+        assertEquals(IndicadorAmbiental.FONTE_MANUAL, new IndicadorAmbiental(1, 55.0, 24.0, 65.0, 12.0, DATA, "  ").getFonte());
+    }
+
+    @Test
     void limitesAceitos() {
         criar(0.0, -20.0, 0.0, 0.0);
         criar(100.0, 60.0, 100.0, 500.0);

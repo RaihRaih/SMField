@@ -33,14 +33,32 @@ O roteiro obrigatório foi executado na interface Swing real: os campos dos pain
 | 14. Segunda medição 22 / 36 / 35 / 0 | Índice 68 — ALTO | `12-indicadores-registro-2.png`, `13-consulta-justificativa-registro-2.png` |
 | 15. Histórico | 2 registros; variação BAIXO → ALTO; 2 alertas | `14-historico-e-alertas.png` |
 | 16–17. Fechar e reabrir | Dashboard mantém Fazenda Modelo / Talhão A / 68 / Alto | `15-dashboard-apos-reabrir.png` |
-| Dados de demonstração | 7 talhões ordenados por criticidade (2 alto, 2 médio, 2 baixo, 1 não calculado) | `16-dashboard-com-dados-demo.png` |
-| Alertas com demonstração | 6 alertas (risco alto, mudança, sem indicadores) | `17-historico-alertas-demo.png` |
-| Consulta de outro talhão | Índice 90, fatores e ocorrência exibidos | `18-consulta-cafe-encosta.png` |
+| Dados de demonstração (Sorriso/MT, Rio Verde/GO, Patrocínio/MG, clima real do INMET) | 7 talhões ordenados por criticidade: 2 alto (milho safrinha de Rio Verde e o Talhão A do roteiro), 2 médio, 2 baixo, 1 não calculado | `16-dashboard-com-dados-demo.png` |
+| Alertas com demonstração | 7 alertas (risco alto, mudança de classificação, sem indicadores) | `17-historico-alertas-demo.png` |
+| Consulta de outro talhão | Café Catuaí (Patrocínio/MG): índice 8 (Baixo), fonte INMET + solo simulado, ocorrência de bicho-mineiro | `18-consulta-cafe-catuai.png` |
 | RF-10 ocorrência | "Ocorrência registrada com sucesso." | `19-ocorrencias.png` |
-| Compatibilidade (demo) | "2 cultura(s) potencialmente compatível(is) segundo a base simulada." | `20-compatibilidade-demo.png` |
+| Compatibilidade (demo) | Sorriso/MT com clima real da estação A904: "3 cultura(s) potencialmente compatível(is)" (milho, soja, feijão) | `20-compatibilidade-demo.png` |
 | RF-09 edição | Área alterada para 14,5 ha | `22-talhoes-apos-edicao.png` |
 | RF-09 exclusão | Confirmação informa 2 indicadores e 0 ocorrências vinculados; resposta "Não" mantém o talhão | `21-confirmacao-exclusao-talhao.png` |
 
-Os valores usados com o município "Contagem" são fictícios e não representam condições reais. Os dados de demonstração são marcados como [SIMULADO].
+Os valores usados com o município "Contagem" são fictícios e não representam condições reais. Na demonstração, municípios e clima são reais (INMET); propriedades, talhões e ocorrências são fictícios ([DEMO]) e a umidade do solo é simulada.
 
 Também foram verificados os comandos de execução: `mvn compile exec:java` e `java -jar target/smfield.jar` abriram a janela sem erros.
+
+## 3. Dados reais do INMET (RF-13)
+
+Roteiro executado na interface real (`inmet/RoteiroInmet.java.txt`); registro completo em `inmet/log-roteiro-inmet.txt`.
+
+| Verificação | Resultado observado | Tela |
+|---|---|---|
+| Propriedade em Contagem (sem estação própria) | Mensagem orientando a buscar a cidade mais próxima | `inmet/01-aba-inmet-municipio-sem-estacao.png` |
+| Busca "Belo Horizonte" | 3 estações; selecionada A521 (Pampulha), dados de 01/01/2026 a 31/10/2026 | `inmet/02-previa-a521-outubro.png` |
+| Prévia 01–31/10/2026 | 31 dias prontos; ex.: 01/10 = 27,5 °C, 48,8%, 0,4 mm, solo simulado 15,5% → índice 45 (Médio) | `inmet/02-previa-a521-outubro.png` |
+| Período invertido | "A data inicial deve ser anterior ou igual à data final." | `inmet/03-erro-periodo-invertido.png` |
+| Período de 304 dias | "Escolha um período de até 92 dias (informado: 304)." | `inmet/04-erro-periodo-longo.png` |
+| Importação | 31 dias importados | `inmet/05-importacao-concluida.png` |
+| Reimportação | 0 importados, 31 já existiam (sem duplicar) | `inmet/06-importacao-repetida-sem-duplicar.png` |
+| Consulta e histórico | Fonte "INMET A521 (Belo Horizonte - Pampulha/MG) · umidade do solo SIMULADA" | `inmet/07-...`, `inmet/08-...`, `inmet/11-...` |
+| Demonstração em polos do agronegócio | Milho safrinha de Rio Verde/GO em 31/08/2026: índice 68, **ALTO**, com alerta; Sorriso/MT e Patrocínio/MG com clima real | `inmet/09-dashboard-demo-polos-agro.png`, `inmet/10-historico-rio-verde-milho-safrinha.png` |
+
+Build após a integração: **192 testes, 0 falhas** (17 cenários Cucumber), `All coverage checks have been met`.
