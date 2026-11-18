@@ -119,20 +119,20 @@
 
 | # | Ação | O que dizer |
 |---|---|---|
-| 1 | Abrir o SMField (`java -jar target/smfield.jar`). | "Esta é a tela inicial, ainda sem dados." |
-| 2 | Aba **2. Propriedades**: nome "Fazenda Modelo", município "Contagem", **Salvar propriedade**. | "Cadastro com validação: nome e município são obrigatórios." |
-| 3 | Aba **3. Talhões**: propriedade "Fazenda Modelo", "Talhão A", área 12, cultura Milho, **Salvar talhão**. | "Todo talhão fica vinculado a uma propriedade." |
-| 4 | Aba **4. Indicadores**: solo 55, temperatura 24, ar 65, precipitação 12, **Salvar e calcular risco**. | "Condições ideais: índice 0, risco baixo." |
+| 1 | Abrir o SMField (`java -jar target/smfield.jar`). | "Esta é a tela inicial, ainda sem dados. À esquerda fica o menu com as seções; ele pode ser recolhido para dar mais espaço às tabelas." |
+| 2 | Menu lateral **Propriedades**: nome "Fazenda Modelo", município "Contagem", **Salvar propriedade**. | "Cadastro com validação: nome e município são obrigatórios." |
+| 3 | Menu lateral **Talhões**: propriedade "Fazenda Modelo", "Talhão A", área 12, cultura Milho, **Salvar talhão**. | "Todo talhão fica vinculado a uma propriedade." |
+| 4 | Menu lateral **Indicadores ambientais**: solo 55, temperatura 24, ar 65, precipitação 12, **Salvar e calcular risco**. | "Condições ideais: índice 0, risco baixo." |
 | 5 | (Opcional) Digitar 150 na umidade do solo e salvar. | "Valores inválidos são rejeitados com mensagem clara." |
 | 6 | Registrar a segunda medição: solo 22, temperatura 36, ar 35, precipitação 0. | "Agora o índice é 68: risco alto." |
-| 7 | Aba **Consulta de risco**. | Ler a justificativa e mostrar a tabela de pontos por indicador. |
-| 8 | Aba **6. Histórico e alertas**. | "As duas medições estão preservadas, e o sistema avisou a mudança de baixo para alto." |
+| 7 | Menu lateral **Consulta de risco**. | Mostrar o medidor do índice, ler a justificativa e mostrar a composição do índice (pesos e penalidades por indicador). |
+| 8 | Menu lateral **Histórico e alertas**. | "As duas medições estão preservadas, o gráfico mostra a subida de baixo para alto, e o sistema gerou o alerta de mudança." |
 | 9 | Fechar e abrir novamente o programa; ir ao **Dashboard**. | "Os dados continuam lá: ficam gravados em arquivos locais." |
 | 10 | Menu **Arquivo > Carregar dados de demonstração** e voltar ao Dashboard. | "Agora com polos reais do agronegócio e clima real do INMET: Sorriso, Rio Verde e Patrocínio. No topo, em vermelho, o milho safrinha de Rio Verde no fim da seca de agosto, com solo seco e ar abaixo de 30%." |
-| 10b | Aba **Dados reais (INMET)**: buscar "Belo Horizonte", período 01/10/2026 a 31/10/2026, **Visualizar prévia** e **Importar para o talhão**. | "Estes são dados reais do INMET: temperatura, umidade do ar e chuva de outubro em Belo Horizonte. Só a umidade do solo é simulada, e isso fica registrado na fonte de cada medição." |
-| 10c | Aba **Compatibilidade (demo)**, município Sorriso/MT, **Avaliar compatibilidade**. | "Com o clima real de Sorriso, a base simulada aponta milho, soja e feijão como compatíveis, coerente com a vocação da região." |
+| 10b | Menu lateral **Dados reais (INMET)**: buscar "Belo Horizonte", período 01/10/2026 a 31/10/2026, **Visualizar prévia** e **Importar para o talhão**. | "Estes são dados reais do INMET: temperatura, umidade do ar e chuva de outubro em Belo Horizonte. Só a umidade do solo é simulada, e isso fica registrado na fonte de cada medição." |
+| 10c | Menu lateral **Compatibilidade de culturas**, município Sorriso/MT, **Avaliar compatibilidade**. | "Com o clima real de Sorriso, a base simulada aponta milho, soja e feijão como compatíveis, coerente com a vocação da região." |
 | 11 (opcional) | No terminal: `java -cp target/smfield.jar smfield.Main agora --regiao "Belo Horizonte" --mes 10` | "E este é o recomendador da Sprint 1: ele sugere o que plantar em cada região e mês. Continua funcionando no mesmo projeto." |
 
 **O que é real e o que é fictício:** os números digitados para "Contagem" são fictícios. Na demonstração, os municípios e o clima são reais (INMET), enquanto as propriedades, os talhões e as ocorrências [DEMO] são fictícios, e a umidade do solo é simulada.
 
-**Plano B:** se o computador da apresentação não abrir o programa, usar as capturas de `docs/evidencias/telas/` na ordem 01 → 03 → 05 → 09 → 12 → 13 → 14 → 15 → 16.
+**Plano B:** se o computador da apresentação não abrir o programa, usar as capturas de `docs/evidencias/telas/` na ordem 01 → 03 → 05 → 09 → 12 → 13 → 14 → 15 → 16. Para mostrar todas as seções da interface, usar `docs/evidencias/interface/` (01 a 09).

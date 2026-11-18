@@ -15,29 +15,46 @@ Apoiar produtores e gestores agrícolas na identificação e priorização de ta
 
 | ID | Funcionalidade | Onde usar |
 |----|----------------|-----------|
-| RF-01 | Cadastrar, editar e excluir propriedades (nome, município, identificador único) | Aba **2. Propriedades** |
-| RF-02 | Cadastrar talhões vinculados a uma propriedade (nome, área em ha, cultura) | Aba **3. Talhões** |
-| RF-03 | Listar propriedades e consultar os talhões de cada uma | Abas **2. Propriedades** e **3. Talhões** |
-| RF-04 | Registrar indicadores ambientais (umidade do solo, temperatura, umidade do ar, precipitação 24 h, data e hora) | Aba **4. Indicadores ambientais** |
+| RF-01 | Cadastrar, editar e excluir propriedades (nome, município, identificador único) | Seção **Propriedades** |
+| RF-02 | Cadastrar talhões vinculados a uma propriedade (nome, área em ha, cultura) | Seção **Talhões** |
+| RF-03 | Listar propriedades e consultar os talhões de cada uma | Seções **Propriedades** e **Talhões** |
+| RF-04 | Registrar indicadores ambientais (umidade do solo, temperatura, umidade do ar, precipitação 24 h, data e hora) | Seção **Indicadores ambientais** |
 | RF-05 | Calcular o índice de risco (0–100) | Automático ao salvar indicadores |
 | RF-06 | Classificar o risco: BAIXO, MÉDIO, ALTO ou NÃO CALCULADO | Todas as telas de risco |
-| RF-07 | Painel de riscos ordenado por criticidade, com cores | Aba **1. Dashboard** |
-| RF-08 | Consultar indicadores, índice, classificação e justificativa de um talhão | Aba **Consulta de risco** (ou duplo clique no Dashboard) |
-| RF-09* | Editar e excluir talhões (com confirmação e remoção dos registros vinculados) | Aba **3. Talhões** |
-| RF-10* | Registrar ocorrências de campo (praga, doença, falta de irrigação, excesso de água, outra) | Aba **5. Ocorrências** |
-| RF-11* | Histórico de indicadores e riscos (registros anteriores preservados) | Aba **6. Histórico e alertas** |
-| RF-12* | Alertas internos (risco alto, mudança de classificação, talhão sem indicadores) | Aba **6. Histórico e alertas** |
-| RF-13* | Importar clima **real do INMET** (temperatura, umidade do ar e chuva) para um talhão, com umidade do solo **simulada** | Aba **Dados reais (INMET)** |
-| Extra (P3) | Compatibilidade de culturas por município — **módulo demonstrativo com base simulada** | Aba **Compatibilidade (demo)** |
+| RF-07 | Painel de riscos ordenado por criticidade, com cores | Seção **Dashboard** |
+| RF-08 | Consultar indicadores, índice, classificação e justificativa de um talhão | Seção **Consulta de risco** (ou duplo clique no Dashboard) |
+| RF-09* | Editar e excluir talhões (com confirmação e remoção dos registros vinculados) | Seção **Talhões** |
+| RF-10* | Registrar ocorrências de campo (praga, doença, falta de irrigação, excesso de água, outra) | Seção **Ocorrências** |
+| RF-11* | Histórico de indicadores e riscos (registros anteriores preservados) | Seção **Histórico e alertas** |
+| RF-12* | Alertas internos (risco alto, mudança de classificação, talhão sem indicadores) | Seção **Histórico e alertas** |
+| RF-13* | Importar clima **real do INMET** (temperatura, umidade do ar e chuva) para um talhão, com umidade do solo **simulada** | Seção **Dados reais (INMET)** |
+| Extra (P3) | Compatibilidade de culturas por município — **módulo demonstrativo com base simulada** | Seção **Compatibilidade de culturas** |
 | Sprint 1 | Recomendação de plantio, "o que plantar agora" e calendário de colheita por região (linha de comando) | `java -cp target/smfield.jar smfield.Main listar` — ver `docs/sprint-1-cli-java.md` |
 
 \* Requisitos complementares derivados da visão do produto (`docs/requisitos/visao-do-produto.md`).
 
 Os dados são gravados em arquivos JSON locais e continuam disponíveis ao fechar e abrir o programa.
 
+### Interface
+
+A interface segue a identidade visual da logo do SMField: verde floresta, verde agrícola e verde-lima, com a fonte Inter.
+
+- **Menu lateral** com a logo e o slogan, as nove seções em quatro grupos (Visão geral, Cadastros, Monitoramento, Dados e análises), destaque da seção ativa e botão para recolher/expandir (também `Ctrl+B`).
+- **Atalhos:** `Ctrl+1` a `Ctrl+9` abrem as seções (menu **Seções**) e `F5` atualiza todas as telas.
+- **Cartões e gráficos** feitos só com os dados já calculados pelo sistema:
+  - Dashboard: indicadores por nível de risco, rosca de distribuição e barras do índice por talhão;
+  - Consulta: medidor do índice e composição do índice com pesos e penalidades;
+  - Indicadores: evolução de cada indicador do talhão;
+  - Histórico: linha do tempo do índice, com as faixas Baixo/Médio/Alto e as mudanças de classificação destacadas;
+  - INMET: índice dia a dia da prévia.
+- **Classificações em selos** com cor, ícone e texto, para não depender só da cor.
+- **Layout adaptável:** em janelas estreitas o Dashboard empilha os gráficos sob a tabela e as páginas ganham rolagem.
+
+A modernização foi só de apresentação: regras, cálculos, validações, dados e mensagens continuam os mesmos.
+
 ### Dados reais do INMET
 
-O projeto inclui a base real das estações automáticas do **INMET** (634 estações, de 01/01/2026 a 31/10/2026) em `src/main/resources/inmet/`. Na aba **Dados reais (INMET)**:
+O projeto inclui a base real das estações automáticas do **INMET** (634 estações, de 01/01/2026 a 31/10/2026) em `src/main/resources/inmet/`. Na seção **Dados reais (INMET)**:
 
 1. escolha o talhão;
 2. busque a estação pela cidade, UF ou código (se o município da propriedade tiver estação, ela é sugerida automaticamente);
@@ -60,7 +77,7 @@ Origem e atualização da base: `ferramentas/inmet/README.md`.
 |---|---|
 | Linguagem | Java 21 |
 | Build e dependências | Maven |
-| Interface gráfica | Java Swing |
+| Interface gráfica | Java Swing com FlatLaf 3.5.4 (tema próprio do SMField) e fonte Inter (licença SIL OFL 1.1, em `src/main/resources/ui/fontes/`) |
 | Persistência | Arquivos JSON locais com Gson 2.10.1 |
 | Testes unitários | JUnit 5 (5.10.2) |
 | Testes BDD | Cucumber 7.18.0 + Gherkin (em português) |
@@ -153,9 +170,11 @@ Cobertura medida nesta entrega (linhas):
 | `smfield` (Sprint 1) | 76,9% | 71,5% |
 | `smfield.domain` (Sprint 1) | 0% | 0% |
 | `ui` | 0% (interface Swing não tem testes automatizados no build) | 0% |
-| **Total do projeto** | 45,1% | 56,4% |
+| **Total do projeto** | 26,3% | 37,4% |
 
-A regra do JaCoCo no `pom.xml` exige no mínimo **80% de linhas** nos pacotes `service` e `domain` (RNF-06). A interface foi validada por um roteiro executado clicando nos componentes reais (ver `docs/evidencias/`).
+A regra do JaCoCo no `pom.xml` exige no mínimo **80% de linhas** nos pacotes `service` e `domain` (RNF-06). A interface foi validada por roteiros que clicam nos componentes reais (ver `docs/evidencias/`).
+
+O total do projeto caiu de 45,1% para 26,3% porque a modernização visual acrescentou código ao pacote `ui`, que continua sem testes automatizados. A cobertura de `service` e `domain` não mudou.
 
 ## 10. Estrutura de pacotes
 
@@ -166,10 +185,11 @@ SMField/
 │   ├── domain/   entidades e regras invariantes (Propriedade, Talhao, IndicadorAmbiental, NivelRisco, ResultadoRisco...)
 │   ├── service/  regras de negócio (cadastros, motor de risco, monitoramento, alertas, demonstração)
 │   ├── infra/    persistência JSON (JsonRepository e repositórios por entidade)
-│   ├── ui/       interface Swing (AppMain, MainFrame e painéis, incluindo InmetPanel)
+│   ├── ui/       interface Swing: AppMain, MainFrame, BarraLateral, painéis e design system (Estilo, Cartao, Graficos, Icone)
 │   └── smfield/  Sprint 1: recomendador de plantio por região (linha de comando)
 ├── src/main/resources/dados/   Sprint 1: culturas.json e regioes.json (valores ilustrativos)
 ├── src/main/resources/inmet/   base real do INMET (estacoes.csv e diario_consolidado.csv)
+├── src/main/resources/ui/      logo e ícones do SMField (marca/) e fonte Inter com a licença OFL (fontes/)
 ├── ferramentas/inmet/          script que gera a base do INMET e instruções de atualização
 ├── src/test/java/          testes JUnit (domain, service, infra) e passos Cucumber (bdd)
 ├── src/test/resources/features/   cenários Gherkin (.feature)

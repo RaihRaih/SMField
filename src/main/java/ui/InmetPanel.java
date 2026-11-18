@@ -18,9 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,18 +33,26 @@ public class InmetPanel extends JPanel implements Atualizavel {
 
     private final JComboBox<Estilo.OpcaoTalhao> comboTalhao = new JComboBox<>();
     private final JTextField campoBusca = new JTextField(16);
-    private final JButton botaoBuscar = Estilo.botao("Buscar estação");
+    private final JButton botaoBuscar = Estilo.botao("Buscar", Icone.Tipo.BUSCAR);
     private final JComboBox<EstacaoMeteorologica> comboEstacao = new JComboBox<>();
     private final JLabel infoEstacao = Estilo.nota("Carregando a base do INMET...");
     private final JTextField campoInicio = new JTextField(10);
     private final JTextField campoFim = new JTextField(10);
-    private final JButton botaoPrevia = Estilo.botao("Visualizar prévia");
-    private final JButton botaoImportar = Estilo.botaoPrimario("Importar para o talhão");
+    private final JButton botaoPrevia = Estilo.botao("Visualizar prévia", Icone.Tipo.OLHO);
+    private final JButton botaoImportar = Estilo.botaoPrimario("Importar para o talhão", Icone.Tipo.IMPORTAR);
 
     private final DefaultTableModel modelo = Estilo.modelo("Data", "Temp. média (°C)", "Umidade do ar (%)",
             "Chuva do dia (mm)", "Umidade do solo SIMULADA (%)", "Índice", "Classificação", "Situação");
     private final JTable tabela = Estilo.tabela(modelo);
     private final JLabel resumo = new JLabel(" ");
+    private final JLabel estCodigo = new JLabel("—");
+    private final JLabel estLocal = new JLabel("—");
+    private final JLabel estRegiao = new JLabel("—");
+    private final JLabel estAltitude = new JLabel("—");
+    private final JLabel estCobertura = new JLabel("—");
+    private final JLabel estPeriodo = new JLabel("—");
+    private final Graficos.SerieTemporal graficoPrevia = new Graficos.SerieTemporal(true, false)
+            .vazio("Clique em \"Visualizar prévia\" para ver o índice dia a dia.");
 
     private boolean baseCarregada = false;
     private boolean carregandoCombos = false;
@@ -52,74 +60,113 @@ public class InmetPanel extends JPanel implements Atualizavel {
     public InmetPanel(ServicosSMField servicos, Runnable aoAlterar) {
         this.servicos = servicos;
         this.aoAlterar = aoAlterar;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        setBackground(Estilo.CINZA_FUNDO);
-
-        JPanel topo = new JPanel(new BorderLayout(6, 6));
+        Estilo.pagina(this);
+        JPanel topo = new JPanel(new BorderLayout(0, 14));
         topo.setOpaque(false);
-        topo.add(Estilo.titulo("Dados reais do INMET"), BorderLayout.NORTH);
-        topo.add(Estilo.nota("<html>" + InmetService.AVISO + "</html>"), BorderLayout.CENTER);
+        topo.add(Estilo.cabecalho("Dados reais do INMET",
+                "Clima diário de estações meteorológicas reais, importado para os talhões com prévia do risco."),
+                BorderLayout.NORTH);
+        topo.add(Estilo.faixaAviso(InmetService.AVISO, false), BorderLayout.CENTER);
         add(topo, BorderLayout.NORTH);
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(Estilo.secao("Importação"));
-        GridBagConstraints c = Estilo.gbc(0, 0);
-        form.add(new JLabel("Talhão de destino *"), c);
-        c.gridx = 1;
-        c.gridwidth = 3;
-        form.add(comboTalhao, c);
-        c.gridwidth = 1;
-        c.gridy++;
-        c.gridx = 0;
-        form.add(new JLabel("Buscar estação (cidade, UF ou código)"), c);
-        c.gridx = 1;
-        form.add(campoBusca, c);
-        c.gridx = 2;
-        form.add(botaoBuscar, c);
-        c.gridy++;
-        c.gridx = 0;
-        form.add(new JLabel("Estação INMET *"), c);
-        c.gridx = 1;
-        c.gridwidth = 3;
-        form.add(comboEstacao, c);
-        c.gridy++;
-        c.gridx = 1;
-        form.add(infoEstacao, c);
-        c.gridwidth = 1;
-        c.gridy++;
-        c.gridx = 0;
-        form.add(new JLabel("Período (dd/mm/aaaa) *"), c);
-        JPanel periodo = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        Cartao form = new Cartao("Importação", "Campos com * são obrigatórios", Icone.Tipo.IMPORTAR);
+        JPanel col = Estilo.coluna();
+        Estilo.empilhar(col, Estilo.blocoCampo("Talhão de destino", true, comboTalhao), 12);
+        JPanel busca = new JPanel(new BorderLayout(8, 0));
+        busca.setOpaque(false);
+        campoBusca.putClientProperty("JTextField.leadingIcon", Icone.de(Icone.Tipo.BUSCAR, 15, Estilo.TEXTO_FRACO));
+        Estilo.exemplo(campoBusca, "cidade, UF ou código (ex.: Sorriso/MT)");
+        busca.add(campoBusca, BorderLayout.CENTER);
+        busca.add(botaoBuscar, BorderLayout.EAST);
+        Estilo.empilhar(col, Estilo.blocoCampo("Buscar estação", false, busca), 12);
+        Estilo.empilhar(col, Estilo.blocoCampo("Estação INMET", true, comboEstacao), 12);
+        JPanel periodo = new JPanel(new java.awt.GridBagLayout());
         periodo.setOpaque(false);
-        periodo.add(campoInicio);
-        periodo.add(new JLabel("até"));
-        periodo.add(campoFim);
-        periodo.add(Estilo.nota("máximo " + InmetService.LIMITE_DIAS + " dias"));
-        c.gridx = 1;
-        c.gridwidth = 3;
-        form.add(periodo, c);
-        c.gridy++;
-        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        botoes.setOpaque(false);
-        botoes.add(botaoPrevia);
-        botoes.add(botaoImportar);
-        form.add(botoes, c);
+        GridBagConstraints p = new GridBagConstraints();
+        p.fill = GridBagConstraints.HORIZONTAL;
+        p.weightx = 1;
+        campoInicio.putClientProperty("JTextField.leadingIcon", Icone.de(Icone.Tipo.CALENDARIO, 15, Estilo.TEXTO_FRACO));
+        campoFim.putClientProperty("JTextField.leadingIcon", Icone.de(Icone.Tipo.CALENDARIO, 15, Estilo.TEXTO_FRACO));
+        periodo.add(campoInicio, p);
+        p.weightx = 0;
+        p.insets = new java.awt.Insets(0, 8, 0, 8);
+        JLabel ate = Estilo.nota("até");
+        periodo.add(ate, p);
+        p.weightx = 1;
+        p.insets = new java.awt.Insets(0, 0, 0, 0);
+        periodo.add(campoFim, p);
+        Estilo.empilhar(col, Estilo.blocoCampo("Período (dd/mm/aaaa)", true, periodo), 4);
+        Estilo.empilhar(col, Estilo.dica("Máximo de " + InmetService.LIMITE_DIAS + " dias por importação."), 16);
+        Estilo.empilhar(col, botaoPrevia, 10);
+        Estilo.empilhar(col, botaoImportar, 0);
+        form.corpo().add(col, BorderLayout.NORTH);
 
-        JPanel lista = new JPanel(new BorderLayout(4, 4));
-        lista.setBorder(Estilo.secao("Prévia dia a dia (nada é gravado até clicar em Importar)"));
-        tabela.getColumnModel().getColumn(6).setCellRenderer(Estilo.renderizadorNivel());
+        Cartao estacao = new Cartao("Estação selecionada", null, Icone.Tipo.ESTACAO);
+        JPanel fichas = new JPanel(new java.awt.GridLayout(3, 2, 16, 12));
+        fichas.setOpaque(false);
+        fichas.add(Estilo.informacao(Icone.Tipo.ESTACAO, "Código", estCodigo));
+        fichas.add(Estilo.informacao(Icone.Tipo.LOCAL, "Município / UF", estLocal));
+        fichas.add(Estilo.informacao(Icone.Tipo.AREA, "Região", estRegiao));
+        fichas.add(Estilo.informacao(Icone.Tipo.TENDENCIA, "Altitude", estAltitude));
+        fichas.add(Estilo.informacao(Icone.Tipo.DADOS, "Cobertura da base", estCobertura));
+        fichas.add(Estilo.informacao(Icone.Tipo.CALENDARIO, "Dados disponíveis", estPeriodo));
+        JPanel topoEstacao = new JPanel(new BorderLayout(0, 12));
+        topoEstacao.setOpaque(false);
+        topoEstacao.add(fichas, BorderLayout.NORTH);
+        infoEstacao.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        topoEstacao.add(infoEstacao, BorderLayout.CENTER);
+        estacao.corpo().add(topoEstacao, BorderLayout.NORTH);
+        JPanel blocoGrafico = new JPanel(new BorderLayout(0, 6));
+        blocoGrafico.setOpaque(false);
+        blocoGrafico.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, Estilo.BORDA), BorderFactory.createEmptyBorder(10, 0, 0, 0)));
+        JLabel tituloGrafico = new JLabel("Índice de risco na prévia (dia a dia)");
+        tituloGrafico.setFont(Estilo.ROTULO);
+        tituloGrafico.setForeground(Estilo.TEXTO_SUAVE);
+        blocoGrafico.add(tituloGrafico, BorderLayout.NORTH);
+        blocoGrafico.add(graficoPrevia, BorderLayout.CENTER);
+        estacao.corpo().add(blocoGrafico, BorderLayout.CENTER);
+        estacao.corpo().add(Estilo.dica("Fonte dos dados: INMET (estações automáticas). Umidade do solo SIMULADA a partir da chuva e do clima."),
+                BorderLayout.SOUTH);
+
+        Cartao lista = new Cartao("Prévia dia a dia", "Nada é gravado até clicar em \"Importar para o talhão\"",
+                Icone.Tipo.OLHO);
+        tabela.getColumnModel().getColumn(0).setMinWidth(96);
         tabela.getColumnModel().getColumn(4).setPreferredWidth(200);
-        tabela.getColumnModel().getColumn(7).setPreferredWidth(220);
-        lista.add(Estilo.rolagem(tabela), BorderLayout.CENTER);
-        resumo.setFont(Estilo.NORMAL);
-        lista.add(resumo, BorderLayout.SOUTH);
+        tabela.getColumnModel().getColumn(5).setCellRenderer(Estilo.renderizadorContagem());
+        tabela.getColumnModel().getColumn(5).setMaxWidth(70);
+        tabela.getColumnModel().getColumn(6).setCellRenderer(Estilo.renderizadorNivel());
+        tabela.getColumnModel().getColumn(6).setMinWidth(150);
+        tabela.getColumnModel().getColumn(7).setCellRenderer(Estilo.renderizadorPilula(InmetPanel::pilulaSituacao));
+        tabela.getColumnModel().getColumn(7).setPreferredWidth(240);
+        tabela.getColumnModel().getColumn(7).setMinWidth(230);
+        graficoPrevia.setPreferredSize(new Dimension(340, 150));
+        lista.corpo().add(Estilo.rolagem(tabela), BorderLayout.CENTER);
+        resumo.setFont(Estilo.MEDIA);
+        resumo.setForeground(Estilo.TEXTO_SUAVE);
+        lista.corpo().add(resumo, BorderLayout.SOUTH);
 
-        JPanel centro = new JPanel(new BorderLayout(10, 10));
-        centro.setOpaque(false);
-        centro.add(form, BorderLayout.NORTH);
-        centro.add(lista, BorderLayout.CENTER);
-        add(centro, BorderLayout.CENTER);
+        JPanel conteudo = new JPanel(new java.awt.GridBagLayout());
+        conteudo.setOpaque(false);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.gridy = 0;
+        c.gridx = 0;
+        form.setPreferredSize(new Dimension(420, 506));
+        conteudo.add(form, c);
+        c.gridx = 1;
+        c.weightx = 1;
+        c.insets = new java.awt.Insets(0, 16, 0, 0);
+        estacao.setPreferredSize(new Dimension(500, 506));
+        conteudo.add(estacao, c);
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridwidth = 2;
+        c.weighty = 1;
+        c.insets = new java.awt.Insets(16, 0, 0, 0);
+        lista.setPreferredSize(new Dimension(600, 340));
+        conteudo.add(lista, c);
+        add(Estilo.rolavel(conteudo), BorderLayout.CENTER);
 
         habilitar(false);
         botaoBuscar.addActionListener(e -> buscar(campoBusca.getText(), null));
@@ -226,6 +273,9 @@ public class InmetPanel extends JPanel implements Atualizavel {
     private void estacaoSelecionada() {
         Object o = comboEstacao.getSelectedItem();
         if (!(o instanceof EstacaoMeteorologica e)) {
+            for (JLabel l : new JLabel[]{estCodigo, estLocal, estRegiao, estAltitude, estCobertura, estPeriodo}) {
+                l.setText("—");
+            }
             return;
         }
         Optional<LocalDate[]> periodo = servicos.inmet().periodoDisponivel(e.codigo());
@@ -233,6 +283,12 @@ public class InmetPanel extends JPanel implements Atualizavel {
             infoEstacao.setText(e.nome() + "/" + e.uf() + " — sem dias completos na base.");
             return;
         }
+        estCodigo.setText(e.codigo());
+        estLocal.setText(e.nome() + " / " + e.uf());
+        estRegiao.setText(e.regiao());
+        estAltitude.setText(Estilo.numero(e.altitudeM()) + " m");
+        estCobertura.setText(Estilo.numero(e.coberturaPct()) + "% dos dias");
+        estPeriodo.setText(Estilo.formatar(periodo.get()[0]) + " a " + Estilo.formatar(periodo.get()[1]));
         LocalDate fim = periodo.get()[1];
         LocalDate inicio = fim.minusDays(29).isBefore(periodo.get()[0]) ? periodo.get()[0] : fim.minusDays(29);
         infoEstacao.setText(String.format("%s/%s · região %s · altitude %s m · cobertura %s%% · dados de %s a %s",
@@ -262,7 +318,11 @@ public class InmetPanel extends JPanel implements Atualizavel {
             return;
         }
         int prontos = 0;
+        java.util.List<Graficos.Ponto> pontos = new java.util.ArrayList<>();
         for (InmetService.DiaInmet d : dias[0]) {
+            if (d.resultado().getIndice() != null) {
+                pontos.add(new Graficos.Ponto(d.data().atTime(12, 0), d.resultado().getIndice(), d.resultado().getNivel(), false));
+            }
             LeituraClimaticaDiaria l = d.leitura();
             boolean completo = d.situacao() != InmetService.Situacao.INCOMPLETO;
             modelo.addRow(new Object[]{Estilo.formatar(d.data()),
@@ -276,6 +336,7 @@ public class InmetPanel extends JPanel implements Atualizavel {
                 prontos++;
             }
         }
+        graficoPrevia.mostrar(pontos);
         resumo.setText(dias[0].size() + " dia(s) no período · " + prontos + " pronto(s) para importar"
                 + (talhaoId <= 0 ? " · selecione um talhão para importar" : "") + ".");
     }
@@ -283,7 +344,7 @@ public class InmetPanel extends JPanel implements Atualizavel {
     private void importar() {
         long talhaoId = Estilo.idTalhao(comboTalhao);
         if (talhaoId <= 0) {
-            JOptionPane.showMessageDialog(this, "Selecione o talhão de destino. Cadastre um talhão na aba \"Talhões\" se necessário.");
+            JOptionPane.showMessageDialog(this, "Selecione o talhão de destino. Cadastre um talhão na seção \"Talhões\" se necessário.");
             return;
         }
         InmetService.ResultadoImportacao[] r = new InmetService.ResultadoImportacao[1];
@@ -301,6 +362,17 @@ public class InmetPanel extends JPanel implements Atualizavel {
             aoAlterar.run();
             previa();
         }
+    }
+
+    private static Estilo.Pilula pilulaSituacao(Object v) {
+        if (!(v instanceof InmetService.Situacao s)) {
+            return null;
+        }
+        return switch (s) {
+            case PRONTO -> new Estilo.Pilula(s.toString(), new Color(0xE6F4EB), new Color(0x1C6A3C), Icone.Tipo.CHECK);
+            case JA_IMPORTADO -> new Estilo.Pilula(s.toString(), Estilo.INFO_TINTA, Estilo.INFO, Icone.Tipo.DADOS);
+            case INCOMPLETO -> new Estilo.Pilula(s.toString(), new Color(0xEEF1EE), new Color(0x4F5A52), Icone.Tipo.CIRCULO);
+        };
     }
 
     public void selecionarTalhao(long talhaoId) {

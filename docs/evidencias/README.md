@@ -37,7 +37,7 @@ O roteiro obrigatório foi executado na interface Swing real: os campos dos pain
 | Alertas com demonstração | 7 alertas (risco alto, mudança de classificação, sem indicadores) | `17-historico-alertas-demo.png` |
 | Consulta de outro talhão | Café Catuaí (Patrocínio/MG): índice 8 (Baixo), fonte INMET + solo simulado, ocorrência de bicho-mineiro | `18-consulta-cafe-catuai.png` |
 | RF-10 ocorrência | "Ocorrência registrada com sucesso." | `19-ocorrencias.png` |
-| Compatibilidade (demo) | Sorriso/MT com clima real da estação A904: "3 cultura(s) potencialmente compatível(is)" (milho, soja, feijão) | `20-compatibilidade-demo.png` |
+| Compatibilidade de culturas | Sorriso/MT com clima real da estação A904: "3 cultura(s) potencialmente compatível(is)" (milho, soja, feijão) | `20-compatibilidade-demo.png` |
 | RF-09 edição | Área alterada para 14,5 ha | `22-talhoes-apos-edicao.png` |
 | RF-09 exclusão | Confirmação informa 2 indicadores e 0 ocorrências vinculados; resposta "Não" mantém o talhão | `21-confirmacao-exclusao-talhao.png` |
 
@@ -62,3 +62,25 @@ Roteiro executado na interface real (`inmet/RoteiroInmet.java.txt`); registro co
 | Demonstração em polos do agronegócio | Milho safrinha de Rio Verde/GO em 31/08/2026: índice 68, **ALTO**, com alerta; Sorriso/MT e Patrocínio/MG com clima real | `inmet/09-dashboard-demo-polos-agro.png`, `inmet/10-historico-rio-verde-milho-safrinha.png` |
 
 Build após a integração: **192 testes, 0 falhas** (17 cenários Cucumber), `All coverage checks have been met`.
+
+## 4. Interface modernizada
+
+Capturas de todas as seções na interface nova, com os dados de demonstração (janela 1440 × 900), geradas por `interface/Vitrine.java.txt` (não faz parte do build). As capturas das seções 2 e 3 acima também foram refeitas com a interface nova pelos mesmos roteiros, que terminaram com os mesmos resultados de antes da modernização (`FIM OK`).
+
+| Seção | Tela |
+|---|---|
+| Dashboard (indicadores por nível, tabela, rosca e barras do índice) | `interface/01-dashboard.png` |
+| Propriedades | `interface/02-propriedades.png` |
+| Talhões | `interface/03-talhoes.png` |
+| Indicadores ambientais (evolução de cada indicador) | `interface/04-indicadores-ambientais.png` |
+| Consulta de risco (medidor, justificativa e composição do índice) | `interface/05-consulta-de-risco.png` |
+| Ocorrências | `interface/06-ocorrencias.png` |
+| Histórico e alertas (linha do tempo do índice) | `interface/07-historico-e-alertas.png` |
+| Dados reais (INMET) (estação e índice da prévia) | `interface/08-dados-reais-inmet.png` |
+| Compatibilidade de culturas (cartões por cultura) | `interface/09-compatibilidade-de-culturas.png` |
+| Menu recolhido na janela mínima (1120 × 720), com o Dashboard reorganizado | `interface/10-menu-recolhido-janela-minima.png` |
+| Sistema sem dados (estado vazio) | `interface/11-dashboard-sem-dados.png` |
+| Janela "Sobre" com a logo oficial e o slogan | `interface/12-sobre-com-logo.png` |
+| Janela "Como o risco é calculado" | `interface/13-modelo-de-risco.png` |
+
+Build após a modernização: **192 testes, 0 falhas** (17 cenários Cucumber), `All coverage checks have been met`.

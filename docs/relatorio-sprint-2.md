@@ -28,7 +28,8 @@ Ajudar produtores e gestores a **priorizar os talhões que precisam de atenção
 |---|---|
 | Java 21 | Linguagem de todo o sistema |
 | Maven | Build, dependências, execução (`exec:java`) e empacotamento (`smfield.jar`) |
-| Java Swing | Interface gráfica desktop |
+| Java Swing + FlatLaf 3.5.4 | Interface gráfica desktop, com tema próprio do SMField (FlatLaf, licença Apache 2.0) |
+| Fonte Inter | Tipografia da interface, embutida no projeto (licença SIL OFL 1.1) |
 | Gson 2.10.1 | Persistência em arquivos JSON locais |
 | Base do INMET (CSV) | Clima real de 634 estações automáticas, jan–out/2026, tratado previamente por script Python |
 | JUnit 5 (5.10.2) | Testes unitários |
@@ -43,9 +44,9 @@ O código está organizado em quatro camadas (pacotes Java):
 - **`domain`** — entidades e regras invariantes: `Propriedade`, `Talhao`, `IndicadorAmbiental`, `NivelRisco`, `ResultadoRisco`, `FatorRisco`, `OcorrenciaCampo`, `Alerta` etc. Nenhuma dependência de outras camadas.
 - **`service`** — regras de negócio: cadastros, motor de risco (`RiscoService`), consolidação do painel, histórico e alertas (`MonitoramentoService`), ocorrências, dados de demonstração e o módulo demonstrativo de compatibilidade.
 - **`infra`** — persistência: `JsonRepository<T>` genérico e repositórios por entidade, gravando arquivos JSON na pasta `dados/`.
-- **`ui`** — interface Swing: janela principal com abas e painéis que apenas chamam os serviços e exibem os resultados.
+- **`ui`** — interface Swing: janela principal com menu lateral, painéis que apenas chamam os serviços e exibem os resultados, e um design system próprio (`Estilo`, `Cartao`, `Graficos`, `Icone`, `BarraLateral`).
 
-A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema da Sprint 2 possui **50 tipos Java autorais** (17 em `domain`, 11 em `service`, 8 em `infra` e 14 em `ui`).
+A interface não contém cálculo de risco nem regras de validação: tudo isso fica em `domain`/`service`, o que permitiu testar as regras sem abrir janelas. O sistema da Sprint 2 possui **54 tipos Java autorais** (17 em `domain`, 11 em `service`, 8 em `infra` e 18 em `ui`).
 
 O módulo da Sprint 1 (recomendador de plantio por região, linha de comando) foi mantido sem alterações no pacote `smfield`, com seus dados em `src/main/resources/dados/`. Ele compartilha o mesmo `pom.xml` e o mesmo build. Detalhes em `docs/arquitetura/arquitetura-inicial.md`.
 
@@ -121,7 +122,7 @@ Documentação completa: `docs/sprint-1-cli-java.md`.
 
 Para aproximar o sistema de dados reais, foi integrada uma base das estações automáticas do **INMET**: 634 estações, de 01/01/2026 a 31/10/2026, com mais de 128 mil dias de registro. A base foi tratada previamente por um script Python (`ferramentas/inmet/tratar_inmet.py`), recebido de um colaborador, que resume os registros horários em valores diários.
 
-- **Aba "Dados reais (INMET)":**
+- **Seção "Dados reais (INMET)":**
   - busca de estação por cidade, UF ou código, com sugestão automática pelo município da propriedade;
   - prévia dia a dia com o risco que seria calculado;
   - importação de até 92 dias para um talhão.
@@ -134,11 +135,29 @@ Para aproximar o sistema de dados reais, foi integrada uma base das estações a
   - **Patrocínio/MG** (A523): café Catuaí de agosto a outubro, da seca à florada, e um talhão de café novo ainda sem medições.
 
   Os municípios e o clima são reais; propriedades, talhões e ocorrências são fictícios (prefixo [DEMO]).
-- **Compatibilidade com clima real:** quando o município tem estação, a aba "Compatibilidade (demo)" passa a usar o clima real da estação (jan–out/2026) em vez das médias de poucos registros. Como resultado:
+- **Compatibilidade com clima real:** quando o município tem estação, a seção "Compatibilidade de culturas" passa a usar o clima real da estação (jan–out/2026) em vez das médias de poucos registros. Como resultado:
   - Sorriso aparece compatível com milho, soja e feijão;
   - Patrocínio inclui o café.
 
   A umidade do solo fica de fora dessa comparação, porque o INMET não a mede.
+
+### Modernização da interface
+
+Na reta final, a interface foi redesenhada sem alterar regras, cálculos, validações, dados ou mensagens do sistema.
+
+- **Identidade visual:** usa o arquivo original da logo (sem recriá-la com outra fonte). O menu lateral mostra a logo e o slogan, e a janela "Sobre" mostra a logo completa. A paleta segue a logo (verde floresta, verde agrícola, verde-lima) e a fonte é a Inter.
+- **Navegação:** as abas horizontais foram substituídas por um menu lateral com as nove seções em quatro grupos, destaque da seção ativa e opção de recolher (`Ctrl+B`). Por baixo, as telas continuam no mesmo `JTabbedPane`, com a faixa de abas oculta, o que preservou o menu **Seções**, os atalhos `Ctrl+1…9` e a abertura da consulta pelo Dashboard.
+- **Componentes padronizados:** cartões com cantos arredondados e sombra leve, botões principal/secundário/exclusão, campos com exemplos e foco destacado, campos obrigatórios marcados com *, tabelas com selos de classificação (cor, ícone e texto) e estado vazio, avisos acadêmicos em faixas destacadas.
+- **Visualização de dados** (Java2D, sem bibliotecas extras e só com dados já calculados pelo sistema):
+  - rosca de distribuição e barras do índice por talhão no Dashboard;
+  - medidor do índice na Consulta;
+  - evolução de cada indicador;
+  - linha do tempo do índice com as faixas de classificação no Histórico;
+  - índice dia a dia na prévia do INMET.
+- **Layout adaptável:** páginas com rolagem quando a janela é pequena e Dashboard que empilha os gráficos em telas estreitas.
+- **Diálogos** sempre em português ("Sim/Não"), qualquer que seja o idioma do sistema operacional.
+
+A validação foi feita com o build completo (192 testes, 0 falhas) e com os dois roteiros de interface, que clicam nos componentes reais e terminaram com os mesmos resultados de antes da reforma (`docs/evidencias/`). As capturas de todas as seções estão em `docs/evidencias/interface/`.
 
 ### Refinamentos da Sprint 2
 
@@ -161,6 +180,8 @@ Para aproximar o sistema de dados reais, foi integrada uma base das estações a
 | A versão 2.22.3 do `maven-surefire-plugin` não existe no Maven Central | Atualizado para a versão 3.2.5 |
 | Cucumber em português leu "27.54" como 2754, porque no padrão brasileiro a vírgula é o separador decimal | Cenário escrito com "27,54" |
 | No Windows, ao carregar a demonstração (398 gravações seguidas de `indicadores.json`), aparecia "Não foi possível gravar o arquivo de dados". Antivírus e indexador do Windows seguram o arquivo por alguns milissegundos após cada gravação | A troca do arquivo passou a ser repetida até 8 vezes, com pausas curtas, antes de informar erro; o temporário é sempre apagado. Teste novo para falha persistente |
+| Com a interface nova, os botões dos diálogos apareciam em inglês ("Yes/No") em sistemas configurados em outro idioma, e o botão em foco ficava com texto branco sobre verde-claro | Textos dos botões fixados em português e cor do botão em foco corrigida |
+| Tabelas com muitas colunas truncavam o nome do talhão em janelas menores | Propriedade e área passaram a aparecer como segunda linha do talhão e da cultura; o Dashboard reorganiza os gráficos quando a janela é estreita |
 | A demonstração usava municípios fictícios | Substituídos por três polos reais do agronegócio (Sorriso/MT, Rio Verde/GO e Patrocínio/MG), com clima real do INMET |
 | A compatibilidade apontava "nenhuma cultura compatível" em Sorriso/MT, porque usava só as poucas medições de períodos secos e a umidade do solo simulada | Passou a usar o clima real da estação do município, sem a umidade do solo |
 | Município sem estação (ex.: Contagem) fazia a tela pré-selecionar uma estação sem dados, e empates de cobertura escolhiam a estação secundária | Orientação para buscar a cidade mais próxima e desempate pela estação principal (A521) |
@@ -203,7 +224,7 @@ Comando executado: `mvn clean verify`
 | Cobertura de linhas `infra` | 94,7% (ramos 89,1%) |
 | Cobertura de linhas `ui` | 0% — sem testes automatizados de interface |
 | Cobertura de linhas `smfield` (Sprint 1) | 76,9% (`smfield.domain`: 0%) |
-| Cobertura total do projeto | 45,1% de linhas |
+| Cobertura total do projeto | 26,3% de linhas (a interface nova aumentou o pacote `ui`, sem testes automatizados) |
 | Verificação JaCoCo (≥ 80% em `service` e `domain`) | Aprovada ("All coverage checks have been met") |
 
 **Cenários BDD** (`src/test/resources/features`):
@@ -230,12 +251,13 @@ Funcionalidades comprovadamente operacionais (testes automatizados + roteiro na 
 - cadastro, edição, exclusão e listagem de propriedades e talhões, com vínculo obrigatório;
 - registro de indicadores com rejeição de dados inválidos ou incompletos;
 - cálculo, classificação e justificativa do risco;
-- dashboard ordenado por criticidade com cores;
+- dashboard ordenado por criticidade, com cores, selos e gráficos;
 - consulta individual com fatores e ocorrências;
 - histórico preservado e alertas internos;
 - dados mantidos após fechar e reabrir a aplicação;
 - carga de dados de demonstração sem duplicação;
-- módulo demonstrativo de compatibilidade de culturas.
+- módulo demonstrativo de compatibilidade de culturas;
+- interface modernizada (menu lateral, cartões, gráficos), validada pelos mesmos roteiros.
 
 ## 11. Limitações
 
@@ -244,8 +266,8 @@ Funcionalidades comprovadamente operacionais (testes automatizados + roteiro na 
 - **Dados do INMET:** cobrem só jan–out/2026, vêm de um arquivo embutido (sem consulta online) e representam a estação, não a propriedade. A umidade do solo dos registros importados é **simulada**.
 - **Dados de demonstração:** os municípios e o clima são reais (INMET), mas as propriedades, os talhões e as ocorrências são fictícios (prefixo [DEMO]), e a umidade do solo é simulada. Não há sensores nem APIs em tempo real. Os valores digitados no roteiro com "Contagem" também são fictícios.
 - **Ocorrências** não alteram o índice numérico nesta versão.
-- **Relação com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre o clima de uma região e os requisitos das culturas. Essa proposta foi atendida na **Sprint 1** pelo recomendador de plantio por região. A **Sprint 2** seguiu os requisitos do repositório e implementou o monitoramento de riscos por talhão. O módulo "Compatibilidade (demo)" da interface faz uma ligação simples entre as duas sprints: compara o clima real do município (estação do INMET) com uma **base simulada** de requisitos por cultura. Nenhuma das duas sprints considera características de solo como pH, textura e fertilidade, e nenhuma deve ser apresentada como recomendação agronômica.
-- **Interface** sem testes automatizados no build (validada pelo roteiro com capturas de tela).
+- **Relação com o pré-projeto:** o pré-projeto apresentado no Ânima HUB tratava da comparação entre o clima de uma região e os requisitos das culturas. Essa proposta foi atendida na **Sprint 1** pelo recomendador de plantio por região. A **Sprint 2** seguiu os requisitos do repositório e implementou o monitoramento de riscos por talhão. O módulo "Compatibilidade de culturas" da interface faz uma ligação simples entre as duas sprints: compara o clima real do município (estação do INMET) com uma **base simulada** de requisitos por cultura. Nenhuma das duas sprints considera características de solo como pH, textura e fertilidade, e nenhuma deve ser apresentada como recomendação agronômica.
+- **Interface** sem testes automatizados no build (validada pelos roteiros com capturas de tela). Por isso a cobertura total do projeto é baixa, embora as camadas de regras estejam acima de 99%.
 - **Persistência JSON** pensada para uso local por um usuário.
 
 ## 12. Evoluções futuras
@@ -257,7 +279,7 @@ Possibilidades não implementadas nesta versão:
 - sensores IoT de umidade do solo;
 - faixas de referência por cultura e por fase, definidas com apoio agronômico;
 - uso das ocorrências no cálculo, com regra validada;
-- gráficos de tendência, exportação de relatórios e notificações externas;
+- exportação de relatórios e notificações externas;
 - banco de dados e acesso multiusuário;
 - testes automatizados de interface.
 

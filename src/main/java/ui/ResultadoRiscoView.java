@@ -7,58 +7,69 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
 
-/** Componente visual que exibe índice, classificação colorida e justificativa de um resultado. */
+/**
+ * Exibe o resultado de um cálculo de risco: medidor do índice (0–100), selo da
+ * classificação com ícone e texto, e a justificativa produzida pelo sistema (sem alterações).
+ */
 public class ResultadoRiscoView extends JPanel {
 
-    private final JLabel indice = new JLabel("—", SwingConstants.CENTER);
-    private final JLabel nivel = new JLabel("NÃO CALCULADO", SwingConstants.CENTER);
-    private final JPanel selo = new JPanel(new GridLayout(2, 1));
-    private final JTextArea justificativa = new JTextArea(6, 40);
+    private final Graficos.Medidor medidor = new Graficos.Medidor();
+    private final JLabel indice = new JLabel("—");
+    private final JLabel nivel = Estilo.selo(Estilo.pilulaDoNivel(NivelRisco.NAO_CALCULADO));
+    private final JPanel selo = new JPanel(new BorderLayout(0, 6));
+    private final JTextArea justificativa = new JTextArea(5, 40);
 
     public ResultadoRiscoView() {
-        setLayout(new BorderLayout(10, 0));
+        setLayout(new BorderLayout(18, 0));
         setOpaque(false);
-        indice.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 34));
-        indice.setForeground(Color.WHITE);
-        nivel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
-        nivel.setForeground(Color.WHITE);
-        selo.add(indice);
-        selo.add(nivel);
-        selo.setPreferredSize(new Dimension(150, 110));
-        selo.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        selo.setOpaque(false);
+        selo.add(medidor, BorderLayout.CENTER);
+        JPanel linhaSelo = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        linhaSelo.setOpaque(false);
+        linhaSelo.add(nivel);
+        selo.add(linhaSelo, BorderLayout.SOUTH);
+        selo.setPreferredSize(new Dimension(220, 166));
+        add(selo, BorderLayout.WEST);
+
+        JPanel texto = new JPanel(new BorderLayout(0, 6));
+        texto.setOpaque(false);
+        JLabel titulo = new JLabel("Justificativa");
+        titulo.setFont(Estilo.ROTULO);
+        titulo.setForeground(Estilo.TEXTO_SUAVE);
+        texto.add(titulo, BorderLayout.NORTH);
         justificativa.setLineWrap(true);
         justificativa.setWrapStyleWord(true);
         justificativa.setEditable(false);
-        justificativa.setFont(Estilo.NORMAL);
-        justificativa.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-        JPanel coluna = new JPanel(new BorderLayout());
-        coluna.setOpaque(false);
-        coluna.add(selo, BorderLayout.NORTH);
-        add(coluna, BorderLayout.WEST);
-        add(Estilo.rolagem(justificativa), BorderLayout.CENTER);
+        justificativa.setFont(Estilo.fonte("Regular", 13.5f));
+        justificativa.setForeground(Estilo.TEXTO);
+        justificativa.setBackground(new Color(0xF8FAF7));
+        justificativa.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+        justificativa.putClientProperty("FlatLaf.style", "background:#F8FAF7");
+        javax.swing.JScrollPane rolagem = Estilo.rolagem(justificativa);
+        rolagem.getViewport().setBackground(new Color(0xF8FAF7));
+        texto.add(rolagem, BorderLayout.CENTER);
+        add(texto, BorderLayout.CENTER);
         limpar("Nenhum resultado para exibir.");
     }
 
     public void mostrar(ResultadoRisco r) {
         NivelRisco n = r.getNivel();
-        selo.setBackground(Estilo.corDoNivel(n));
         indice.setText(r.isCalculado() ? String.valueOf(r.getIndice()) : "—");
-        nivel.setText(Estilo.textoNivel(n));
+        medidor.mostrar(r.isCalculado() ? r.getIndice() : null, n);
+        Estilo.atualizarSelo(nivel, Estilo.pilulaDoNivel(n));
         justificativa.setText(r.getJustificativa());
         justificativa.setCaretPosition(0);
     }
 
     public void limpar(String mensagem) {
-        selo.setBackground(Estilo.RISCO_NAO_CALCULADO);
         indice.setText("—");
-        nivel.setText("NÃO CALCULADO");
+        medidor.mostrar(null, NivelRisco.NAO_CALCULADO);
+        Estilo.atualizarSelo(nivel, Estilo.pilulaDoNivel(NivelRisco.NAO_CALCULADO));
         justificativa.setText(mensagem);
     }
 }

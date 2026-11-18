@@ -17,9 +17,6 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.List;
 
 /** RF-02, RF-03 e RF-09: cadastro, edição, exclusão e listagem de talhões. */
@@ -41,10 +38,10 @@ public class TalhaoPanel extends JPanel implements Atualizavel {
     private final JTextField campoNome = new JTextField(22);
     private final JTextField campoArea = new JTextField(8);
     private final JComboBox<String> comboCultura = new JComboBox<>(CULTURAS);
-    private final JLabel rotuloModo = Estilo.nota("Novo cadastro");
-    private final JButton botaoSalvar = Estilo.botaoPrimario("Salvar talhão");
-    private final JButton botaoNovo = Estilo.botao("Limpar / novo");
-    private final JButton botaoExcluir = Estilo.botao("Excluir talhão");
+    private final JLabel rotuloModo = Estilo.indicadorModo("Novo cadastro");
+    private final JButton botaoSalvar = Estilo.botaoPrimario("Salvar talhão", Icone.Tipo.CHECK);
+    private final JButton botaoNovo = Estilo.botao("Limpar / novo", Icone.Tipo.LIMPAR);
+    private final JButton botaoExcluir = Estilo.botaoPerigo("Excluir");
 
     private final JComboBox<OpcaoPropriedade> comboFiltro = new JComboBox<>();
     private final DefaultTableModel modelo = Estilo.modelo("ID", "Propriedade", "Talhão", "Área (ha)", "Cultura", "Registros");
@@ -58,21 +55,36 @@ public class TalhaoPanel extends JPanel implements Atualizavel {
         this.servicos = servicos;
         this.aoAlterar = aoAlterar;
         comboCultura.setEditable(true);
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        setBackground(Estilo.CINZA_FUNDO);
-        add(Estilo.titulo("Talhões"), BorderLayout.NORTH);
+        Estilo.pagina(this);
+        add(Estilo.cabecalho("Talhões",
+                "Áreas de cultivo de cada propriedade: área, cultura e quantidade de registros de indicadores."),
+                BorderLayout.NORTH);
         add(criarFormulario(), BorderLayout.WEST);
 
-        JPanel lista = new JPanel(new BorderLayout(4, 4));
-        lista.setBorder(Estilo.secao("Talhões cadastrados"));
-        JPanel filtro = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filtro.add(new JLabel("Filtrar por propriedade:"));
-        filtro.add(comboFiltro);
-        lista.add(filtro, BorderLayout.NORTH);
-        lista.add(Estilo.rolagem(tabela), BorderLayout.CENTER);
-        lista.add(aviso, BorderLayout.SOUTH);
-        add(lista, BorderLayout.CENTER);
+        Cartao lista = new Cartao("Talhões cadastrados", "Selecione uma linha para editar ou excluir", Icone.Tipo.TALHAO);
+        JLabel rotuloFiltro = new JLabel("Propriedade");
+        rotuloFiltro.setFont(Estilo.ROTULO);
+        rotuloFiltro.setForeground(Estilo.TEXTO_SUAVE);
+        comboFiltro.setPreferredSize(new java.awt.Dimension(280, comboFiltro.getPreferredSize().height));
+        lista.acoes(rotuloFiltro, comboFiltro);
+        tabela.getColumnModel().getColumn(0).setMaxWidth(56);
+        tabela.getColumnModel().getColumn(1).setPreferredWidth(220);
+        tabela.getColumnModel().getColumn(1).setCellRenderer(Estilo.renderizadorComIcone(Icone.Tipo.PROPRIEDADE));
+        tabela.getColumnModel().getColumn(2).setPreferredWidth(200);
+        tabela.getColumnModel().getColumn(3).setMinWidth(84);
+        tabela.getColumnModel().getColumn(3).setMaxWidth(100);
+        tabela.getColumnModel().getColumn(4).setMinWidth(120);
+        tabela.getColumnModel().getColumn(4).setCellRenderer(Estilo.renderizadorComIcone(Icone.Tipo.BROTO));
+        tabela.getColumnModel().getColumn(5).setMinWidth(96);
+        tabela.getColumnModel().getColumn(5).setMaxWidth(110);
+        tabela.getColumnModel().getColumn(5).setCellRenderer(Estilo.renderizadorContagem());
+        lista.corpo().add(Estilo.rolagem(tabela), BorderLayout.CENTER);
+        lista.corpo().add(aviso, BorderLayout.SOUTH);
+        JPanel centro = new JPanel(new BorderLayout());
+        centro.setOpaque(false);
+        centro.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
+        centro.add(lista, BorderLayout.CENTER);
+        add(centro, BorderLayout.CENTER);
 
         botaoSalvar.addActionListener(e -> salvar());
         botaoNovo.addActionListener(e -> limpar());
@@ -91,36 +103,32 @@ public class TalhaoPanel extends JPanel implements Atualizavel {
     }
 
     private JPanel criarFormulario() {
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(Estilo.secao("Cadastro / edição"));
-        GridBagConstraints c = Estilo.gbc(0, 0);
-        form.add(new JLabel("Propriedade *"), c);
-        c.gridy++;
-        form.add(comboPropriedade, c);
-        c.gridy++;
-        form.add(new JLabel("Nome do talhão *"), c);
-        c.gridy++;
-        form.add(campoNome, c);
-        c.gridy++;
-        form.add(new JLabel("Área (hectares) * — maior que zero"), c);
-        c.gridy++;
-        form.add(campoArea, c);
-        c.gridy++;
-        form.add(new JLabel("Cultura agrícola *"), c);
-        c.gridy++;
-        form.add(comboCultura, c);
-        c.gridy++;
-        form.add(rotuloModo, c);
-        c.gridy++;
-        form.add(botaoSalvar, c);
-        c.gridy++;
-        form.add(botaoNovo, c);
-        c.gridy++;
-        form.add(botaoExcluir, c);
-        c.gridy++;
-        c.weighty = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        form.add(Estilo.nota("<html>Ao excluir, os indicadores e ocorrências<br>do talhão também são removidos<br>(após confirmação).</html>"), c);
+        Cartao form = new Cartao("Cadastro / edição", "Campos com * são obrigatórios", Icone.Tipo.MAIS);
+        JPanel col = Estilo.coluna();
+        Estilo.empilhar(col, rotuloModo, 14);
+        Estilo.empilhar(col, Estilo.blocoCampo("Propriedade", true, comboPropriedade), 14);
+        Estilo.exemplo(campoNome, "Ex.: Talhão Norte");
+        Estilo.empilhar(col, Estilo.blocoCampo("Nome do talhão", true, campoNome), 14);
+        JPanel areaCultura = new JPanel(new java.awt.GridLayout(1, 2, 12, 0));
+        areaCultura.setOpaque(false);
+        Estilo.exemplo(campoArea, "Ex.: 12,5");
+        campoArea.putClientProperty("JTextField.trailingComponent", Estilo.dica("ha  "));
+        areaCultura.add(Estilo.blocoCampo("Área (hectares)", true, campoArea));
+        areaCultura.add(Estilo.blocoCampo("Cultura agrícola", true, comboCultura));
+        areaCultura.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, areaCultura.getPreferredSize().height));
+        Estilo.empilhar(col, areaCultura, 6);
+        Estilo.empilhar(col, Estilo.dica("A área deve ser maior que zero. A cultura pode ser digitada."), 18);
+        Estilo.empilhar(col, botaoSalvar, 10);
+        JPanel secundarios = new JPanel(new java.awt.GridLayout(1, 2, 10, 0));
+        secundarios.setOpaque(false);
+        secundarios.add(botaoNovo);
+        secundarios.add(botaoExcluir);
+        secundarios.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, botaoNovo.getPreferredSize().height));
+        Estilo.empilhar(col, secundarios, 16);
+        Estilo.empilhar(col, Estilo.faixaAviso("Ao excluir um talhão, os indicadores e ocorrências dele também são "
+                + "removidos, após confirmação.", true), 0);
+        form.corpo().add(col, BorderLayout.NORTH);
+        form.setPreferredSize(new java.awt.Dimension(380, 300));
         return form;
     }
 
@@ -193,7 +201,8 @@ public class TalhaoPanel extends JPanel implements Atualizavel {
                 }
             }
             comboPropriedade.setEnabled(false);
-            rotuloModo.setText("Editando o talhão #" + t.getId() + " (propriedade não pode ser alterada)");
+            rotuloModo.setText("Editando o talhão #" + t.getId() + " · propriedade fixa");
+            rotuloModo.setToolTipText("Na edição, a propriedade do talhão não pode ser alterada.");
         });
     }
 

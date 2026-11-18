@@ -81,9 +81,18 @@ Não há dependências circulares: `domain` não conhece nenhuma outra camada e 
 | `InmetRepository` | Leitura (somente consulta) da base real do INMET embutida em `src/main/resources/inmet/`, carregada uma vez por execução. |
 | `PersistenciaException` | Falha de leitura/gravação com mensagem clara. |
 
-### `ui` (14 tipos)
+### `ui` (18 tipos)
 
-`AppMain`, `MainFrame`, `InmetPanel`, `DashboardPanel`, `PropriedadePanel`, `TalhaoPanel`, `IndicadoresPanel`, `DetalhesRiscoPanel`, `OcorrenciasPanel`, `HistoricoAlertasPanel`, `CompatibilidadePanel`, `ResultadoRiscoView`, `Estilo` (paleta e utilitários visuais) e `Atualizavel` (contrato de recarga das telas).
+- **Janela e navegação:** `AppMain`, `MainFrame` e `BarraLateral` (menu lateral com logo, grupos de seções e recolher/expandir).
+- **Telas:** `DashboardPanel`, `PropriedadePanel`, `TalhaoPanel`, `IndicadoresPanel`, `DetalhesRiscoPanel`, `OcorrenciasPanel`, `HistoricoAlertasPanel`, `InmetPanel`, `CompatibilidadePanel` e `ResultadoRiscoView`.
+- **Design system:**
+  - `Estilo`: paleta da marca, tipografia Inter, tema FlatLaf, botões, tabelas, selos e mensagens;
+  - `Cartao`: superfície com cantos arredondados e sombra;
+  - `Graficos`: medidor, rosca, barras e série temporal em Java2D;
+  - `Icone`: ícones vetoriais.
+- `Atualizavel`: contrato de recarga das telas.
+
+As seções continuam num `JTabbedPane`, com a faixa de abas oculta. O menu lateral apenas seleciona a seção, de modo que o menu **Seções**, os atalhos `Ctrl+1…9` e a navegação entre telas (por exemplo, Dashboard → Consulta) não mudaram. Os recursos visuais ficam em `src/main/resources/ui/`: `marca/` (logo original e ícones) e `fontes/` (Inter e licença OFL).
 
 ### Módulo da Sprint 1 — pacote `smfield`
 
@@ -126,7 +135,9 @@ Cadastro → Indicadores → RiscoService (índice + nível + justificativa) →
 
 | Decisão | Motivo |
 |---|---|
-| Java Swing | Previsto na arquitetura inicial; sem dependências externas e simples de demonstrar. |
+| Java Swing | Previsto na arquitetura inicial; simples de demonstrar. |
+| FlatLaf para a aparência (modernização da interface) | Biblioteca de aparência para Swing (Apache 2.0, sem dependências), compatível com Java 8+. Moderniza campos, botões, tabelas e barras de rolagem sem trocar de framework e sem mexer em regras de negócio. Gráficos e ícones foram desenhados em Java2D para não adicionar outras bibliotecas. |
+| Navegação lateral sobre o mesmo `JTabbedPane` | Menor risco técnico: preserva menu, atalhos, roteiros de teste e a comunicação entre telas. |
 | JSON com Gson em vez de banco de dados | Funciona offline, sem instalação; os arquivos podem ser abertos para conferência. (Decisão da Sprint 2: substitui o `MemoriaPropriedadeRepository` previsto, que perderia os dados ao fechar.) |
 | Cálculo com aritmética inteira (`penalidade × peso%`) | Evita erros de ponto flutuante: resultado determinístico e arredondamento exato. |
 | `NAO_CALCULADO` como estado separado | Atende RN-05: falta de dados nunca é exibida como risco baixo. |

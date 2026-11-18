@@ -62,8 +62,8 @@ public class RoteiroInmet {
 
         aba(abas, abas.indexOfTab("Consulta de risco"));
         foto("04-consulta-talhao-com-inmet");
-        Object pHist = abas.getComponentAt(abas.indexOfTab("6. Histórico e alertas"));
-        aba(abas, abas.indexOfTab("6. Histórico e alertas"));
+        Object pHist = abas.getComponentAt(abas.indexOfTab("Histórico e alertas"));
+        aba(abas, abas.indexOfTab("Histórico e alertas"));
         JTable th = (JTable) campo(pHist, "tabelaHistorico");
         log.println("Histórico Talhão A: " + th.getRowCount() + " | último: " + linhaT(th, th.getRowCount() - 1));
         foto("05-historico-talhao-inmet");
@@ -77,7 +77,7 @@ public class RoteiroInmet {
         Object dash = abas.getComponentAt(0);
         JTable td = (JTable) campo(dash, "tabela");
         for (int r = 0; r < td.getRowCount(); r++) log.println("   " + linhaT(td, r));
-        aba(abas, abas.indexOfTab("6. Histórico e alertas"));
+        aba(abas, abas.indexOfTab("Histórico e alertas"));
         SwingUtilities.invokeAndWait(() -> {
             JComboBox<?> c = (JComboBox<?>) campoSilencioso(pHist, "comboTalhao");
             for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Santa Helena") && c.getItemAt(i).toString().contains("Milho")) c.setSelectedIndex(i);
@@ -85,7 +85,7 @@ public class RoteiroInmet {
         pausa(400);
         log.println("Histórico Milho Safrinha Rio Verde: " + th.getRowCount() + " registros; alertas: " + ((JTable) campo(pHist, "tabelaAlertas")).getRowCount());
         foto("07-historico-rio-verde");
-        aba(abas, abas.indexOfTab("4. Indicadores ambientais"));
+        aba(abas, abas.indexOfTab("Indicadores ambientais"));
         foto("08-indicadores-coluna-fonte");
         log.println("FIM OK");
         log.close();
@@ -94,7 +94,7 @@ public class RoteiroInmet {
 
     static String linhaT(JTable t, int r) {
         StringBuilder sb = new StringBuilder();
-        for (int c = 0; c < t.getColumnCount(); c++) sb.append(t.getValueAt(r, c)).append(" | ");
+        for (int c = 0; c < t.getModel().getColumnCount(); c++) sb.append(t.getModel().getValueAt(t.convertRowIndexToModel(r), c)).append(" | ");
         return sb.toString();
     }
 
@@ -107,7 +107,7 @@ public class RoteiroInmet {
     static String linha(Object painel, int r) throws Exception {
         JTable t = (JTable) campo(painel, "tabela");
         StringBuilder sb = new StringBuilder();
-        for (int c = 0; c < t.getColumnCount(); c++) sb.append(t.getValueAt(r, c)).append(" | ");
+        for (int c = 0; c < t.getModel().getColumnCount(); c++) sb.append(t.getModel().getValueAt(t.convertRowIndexToModel(r), c)).append(" | ");
         return sb.toString();
     }
 

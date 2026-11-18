@@ -6,7 +6,6 @@ import service.ServicosSMField;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import java.nio.file.Path;
 
 /**
@@ -36,18 +35,8 @@ public final class AppMain {
     }
 
     private static void configurarAparencia() {
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    UIManager.put("nimbusBase", Estilo.VERDE_ESCURO);
-                    UIManager.put("nimbusSelectionBackground", Estilo.VERDE);
-                    UIManager.put("control", Estilo.CINZA_FUNDO);
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException e) {
-            // mantém a aparência padrão do Swing
-        }
+        System.setProperty("flatlaf.menuBarEmbedded", "true");
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        Estilo.instalarTema();
     }
 }

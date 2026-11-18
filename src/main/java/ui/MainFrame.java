@@ -11,19 +11,27 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JComponent;
+import javax.swing.JLayer;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Janela principal: cabeçalho, menu de seções e abas que compartilham os mesmos serviços. */
+/**
+ * Janela principal: menu lateral, área de conteúdo com as seções e barra de status.
+ * <p>
+ * As seções continuam num {@link JTabbedPane} (com a faixa de abas oculta), o que preserva
+ * toda a navegação existente — menu "Seções", atalhos Ctrl+1…9 e a abertura da consulta a
+ * partir do painel — enquanto o menu lateral oferece a navegação visual.
+ */
 public class MainFrame extends JFrame {
 
     public static final String TITULO = "SMField — Monitoramento Inteligente Agrícola";
@@ -32,6 +40,8 @@ public class MainFrame extends JFrame {
     private final JTabbedPane abas = new JTabbedPane();
     private final List<Atualizavel> telas = new ArrayList<>();
     private final JLabel status = Estilo.nota(" ");
+    private final BarraLateral menuLateral = new BarraLateral(abas::setSelectedIndex);
+    private final Transicao transicao = new Transicao();
 
     private final DashboardPanel dashboard;
     private final DetalhesRiscoPanel detalhes;
@@ -40,68 +50,78 @@ public class MainFrame extends JFrame {
         super(TITULO);
         this.servicos = servicos;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1100, 720));
-        setSize(1280, 800);
+        setIconImages(Estilo.iconesJanela());
+        setMinimumSize(new Dimension(1120, 720));
+        Dimension tela = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(Math.min(1440, tela.width - 40), Math.min(900, tela.height - 60));
         setLocationRelativeTo(null);
 
         Runnable aoAlterar = this::notificarAlteracao;
         dashboard = new DashboardPanel(servicos, this::abrirDetalhes, this::carregarDemonstracao);
         detalhes = new DetalhesRiscoPanel(servicos);
 
-        adicionar("1. Dashboard", dashboard);
-        adicionar("2. Propriedades", new PropriedadePanel(servicos, aoAlterar));
-        adicionar("3. Talhões", new TalhaoPanel(servicos, aoAlterar));
-        adicionar("4. Indicadores ambientais", new IndicadoresPanel(servicos, aoAlterar));
-        adicionar("Consulta de risco", detalhes);
-        adicionar("5. Ocorrências", new OcorrenciasPanel(servicos, aoAlterar));
-        adicionar("6. Histórico e alertas", new HistoricoAlertasPanel(servicos));
-        adicionar("Dados reais (INMET)", new InmetPanel(servicos, aoAlterar));
-        adicionar("Compatibilidade (demo)", new CompatibilidadePanel(servicos));
-        abas.setFont(Estilo.NORMAL.deriveFont(Font.BOLD));
+        menuLateral.grupo("Visão geral");
+        adicionar("Dashboard", Icone.Tipo.DASHBOARD, dashboard);
+        menuLateral.grupo("Cadastros");
+        adicionar("Propriedades", Icone.Tipo.PROPRIEDADE, new PropriedadePanel(servicos, aoAlterar));
+        adicionar("Talhões", Icone.Tipo.TALHAO, new TalhaoPanel(servicos, aoAlterar));
+        adicionar("Indicadores ambientais", Icone.Tipo.INDICADORES, new IndicadoresPanel(servicos, aoAlterar));
+        menuLateral.grupo("Monitoramento");
+        adicionar("Consulta de risco", Icone.Tipo.CONSULTA, detalhes);
+        adicionar("Ocorrências", Icone.Tipo.OCORRENCIAS, new OcorrenciasPanel(servicos, aoAlterar));
+        adicionar("Histórico e alertas", Icone.Tipo.HISTORICO, new HistoricoAlertasPanel(servicos));
+        menuLateral.grupo("Dados e análises");
+        adicionar("Dados reais (INMET)", Icone.Tipo.INMET, new InmetPanel(servicos, aoAlterar));
+        adicionar("Compatibilidade de culturas", Icone.Tipo.COMPATIBILIDADE, new CompatibilidadePanel(servicos));
+        abas.setUI(new AbasSemFaixa());
+        abas.setBackground(Estilo.FUNDO);
         abas.addChangeListener(e -> {
             Component c = abas.getSelectedComponent();
+            menuLateral.marcar(abas.getSelectedIndex());
+            transicao.iniciar();
             if (c instanceof Atualizavel a) {
                 a.atualizar();
             }
         });
+        menuLateral.marcar(0);
 
         setJMenuBar(criarMenu());
-        setLayout(new BorderLayout());
-        add(criarCabecalho(), BorderLayout.NORTH);
-        add(abas, BorderLayout.CENTER);
+        JPanel conteudo = new JPanel(new BorderLayout());
+        conteudo.setBackground(Estilo.FUNDO);
+        conteudo.add(new JLayer<>(abas, transicao), BorderLayout.CENTER);
         JPanel rodape = new JPanel(new BorderLayout());
-        rodape.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+        rodape.setBackground(Color.WHITE);
+        rodape.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, Estilo.BORDA),
+                BorderFactory.createEmptyBorder(6, 16, 6, 16)));
+        status.setIcon(Icone.de(Icone.Tipo.DADOS, 14, Estilo.TEXTO_FRACO));
+        status.setIconTextGap(8);
+        status.setFont(Estilo.fonte("Regular", 11.5f));
         rodape.add(status, BorderLayout.WEST);
-        add(rodape, BorderLayout.SOUTH);
+        conteudo.add(rodape, BorderLayout.SOUTH);
+
+        setLayout(new BorderLayout());
+        add(menuLateral, BorderLayout.WEST);
+        add(conteudo, BorderLayout.CENTER);
         atualizarStatus();
     }
 
-    private void adicionar(String titulo, Component tela) {
+    private void adicionar(String titulo, Icone.Tipo icone, Component tela) {
+        int indice = abas.getTabCount();
         abas.addTab(titulo, tela);
+        menuLateral.item(indice, titulo, icone, indice < 9 ? "Ctrl+" + (indice + 1) : null);
         if (tela instanceof Atualizavel a) {
             telas.add(a);
         }
-    }
-
-    private JPanel criarCabecalho() {
-        JPanel cab = new JPanel(new BorderLayout());
-        cab.setBackground(Estilo.VERDE_ESCURO);
-        cab.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
-        JLabel titulo = new JLabel(TITULO);
-        titulo.setForeground(Color.WHITE);
-        titulo.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
-        JLabel sub = new JLabel("Sistema de Monitoramento Inteligente e Análise de Riscos Agrícolas — projeto acadêmico");
-        sub.setForeground(new Color(0xC8E6C9));
-        sub.setFont(Estilo.NORMAL);
-        cab.add(titulo, BorderLayout.NORTH);
-        cab.add(sub, BorderLayout.SOUTH);
-        return cab;
     }
 
     private JMenuBar criarMenu() {
         JMenuBar barra = new JMenuBar();
 
         JMenu arquivo = new JMenu("Arquivo");
+        JMenuItem menuLateralItem = new JMenuItem("Recolher/expandir menu lateral");
+        menuLateralItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
+        menuLateralItem.addActionListener(e -> menuLateral.alternar());
         JMenuItem demo = new JMenuItem("Carregar dados de demonstração (clima real do INMET)");
         demo.addActionListener(e -> carregarDemonstracao());
         JMenuItem atualizar = new JMenuItem("Atualizar todas as telas");
@@ -111,6 +131,7 @@ public class MainFrame extends JFrame {
         sair.addActionListener(e -> dispose());
         arquivo.add(demo);
         arquivo.add(atualizar);
+        arquivo.add(menuLateralItem);
         arquivo.addSeparator();
         arquivo.add(sair);
 
@@ -131,11 +152,13 @@ public class MainFrame extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE));
         JMenuItem sobre = new JMenuItem("Sobre o SMField");
         sobre.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "SMField — Monitoramento Inteligente e Análise de Riscos Agrícolas\n"
-                        + "Projeto de Gestão e Qualidade de Software — Squad Ânima HUB\n"
-                        + "Alunos: Arthur, Brener, João, Raissa e Tayná | Professora: Rafaela\n\n"
-                        + "Dados gravados em: " + servicos.diretorioDados().toAbsolutePath(),
-                "Sobre", JOptionPane.INFORMATION_MESSAGE));
+                "<html><b>SMField — Monitoramento Inteligente e Análise de Riscos Agrícolas</b><br>"
+                        + "Projeto de Gestão e Qualidade de Software — Squad Ânima HUB<br>"
+                        + "Alunos: Arthur, Brener, João, Raissa e Tayná | Professora: Rafaela<br><br>"
+                        + "Dados gravados em: " + servicos.diretorioDados().toAbsolutePath() + "<br><br>"
+                        + "<span style='color:#5E6B62'>Fonte Inter (SIL Open Font License 1.1) · "
+                        + "aparência FlatLaf (Apache 2.0)</span></html>",
+                "Sobre", JOptionPane.PLAIN_MESSAGE, logoSobre()));
         ajuda.add(modelo);
         ajuda.add(sobre);
 
@@ -192,9 +215,118 @@ public class MainFrame extends JFrame {
 
     private void atualizarStatus() {
         status.setText("Dados locais: " + servicos.diretorioDados().toAbsolutePath()
-                + "   |   Propriedades: " + servicos.propriedades().listar().size()
-                + "   |   Talhões: " + servicos.talhoes().listar().size()
-                + "   |   Registros de indicadores: " + servicos.indicadores().listarTodos().size());
+                + "   ·   Propriedades: " + servicos.propriedades().listar().size()
+                + "   ·   Talhões: " + servicos.talhoes().listar().size()
+                + "   ·   Registros de indicadores: " + servicos.indicadores().listarTodos().size());
+        menuLateral.setRodape("Projeto acadêmico · Sprint 2<br>" + servicos.talhoes().listar().size()
+                + " talhão(ões) monitorado(s)");
+    }
+
+    /** Logo oficial completa (com slogan) para a janela "Sobre". */
+    private static javax.swing.Icon logoSobre() {
+        java.awt.Image img = Estilo.imagem("logo-smfield.png");
+        if (img == null) {
+            return null;
+        }
+        int w = 300;
+        int h = img.getHeight(null) * w / img.getWidth(null);
+        java.awt.image.BufferedImage b = new java.awt.image.BufferedImage(w, h + 16, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        java.awt.Graphics2D g = b.createGraphics();
+        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+        // reduz em etapas (metade por vez) para manter a nitidez da logo original
+        java.awt.Image atual = img;
+        int aw = img.getWidth(null);
+        int ah = img.getHeight(null);
+        while (aw / 2 >= w) {
+            aw /= 2;
+            ah /= 2;
+            java.awt.image.BufferedImage passo = new java.awt.image.BufferedImage(aw, ah, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            java.awt.Graphics2D gp = passo.createGraphics();
+            gp.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            gp.drawImage(atual, 0, 0, aw, ah, null);
+            gp.dispose();
+            atual = passo;
+        }
+        g.drawImage(atual, 0, 4, w, h, null);
+        g.dispose();
+        return new javax.swing.ImageIcon(b);
+    }
+
+    /** Oculta a faixa de abas: a navegação visual é feita pelo menu lateral. */
+    private static final class AbasSemFaixa extends javax.swing.plaf.basic.BasicTabbedPaneUI {
+        @Override
+        protected int calculateTabAreaHeight(int placement, int runCount, int maxTabHeight) {
+            return 0;
+        }
+
+        @Override
+        protected java.awt.Insets getContentBorderInsets(int tabPlacement) {
+            return new java.awt.Insets(0, 0, 0, 0);
+        }
+
+        @Override
+        protected java.awt.Insets getTabAreaInsets(int tabPlacement) {
+            return new java.awt.Insets(0, 0, 0, 0);
+        }
+
+        @Override
+        protected void paintTabArea(java.awt.Graphics g, int tabPlacement, int selectedIndex) {
+            // sem faixa de abas
+        }
+
+        @Override
+        protected void paintContentBorder(java.awt.Graphics g, int tabPlacement, int selectedIndex) {
+            // sem borda
+        }
+    }
+
+    /** Transição suave (esmaecimento rápido) ao trocar de seção. */
+    private static final class Transicao extends javax.swing.plaf.LayerUI<JTabbedPane> {
+        private float opacidade = 1f;
+        private javax.swing.Timer timer;
+        private JLayer<?> camada;
+
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            camada = (JLayer<?>) c;
+        }
+
+        void iniciar() {
+            if (camada == null) {
+                return;
+            }
+            if (timer != null) {
+                timer.stop();
+            }
+            long t0 = System.currentTimeMillis();
+            opacidade = 0.35f;
+            timer = new javax.swing.Timer(15, e -> {
+                float p = Math.min(1f, (System.currentTimeMillis() - t0) / 160f);
+                opacidade = 0.35f + 0.65f * (1 - (1 - p) * (1 - p));
+                camada.repaint();
+                if (p >= 1f) {
+                    ((javax.swing.Timer) e.getSource()).stop();
+                }
+            });
+            timer.start();
+        }
+
+        @Override
+        public void paint(java.awt.Graphics g, JComponent c) {
+            if (opacidade >= 0.999f) {
+                super.paint(g, c);
+                return;
+            }
+            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+            g2.setColor(Estilo.FUNDO);
+            g2.fillRect(0, 0, c.getWidth(), c.getHeight());
+            g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, opacidade));
+            super.paint(g2, c);
+            g2.dispose();
+        }
     }
 
     JTabbedPane getAbas() {

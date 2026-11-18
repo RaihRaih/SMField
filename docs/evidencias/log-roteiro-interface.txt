@@ -9,12 +9,12 @@
 Dashboard linhas: 1
 [Registro 2 de indicadores] SMField :: Indicadores registrados. Índice de risco: 68 (ALTO).
 Histórico linhas: 2 | Alertas: 2
-Após reabrir — dashboard linhas: 1 | primeira linha: 1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 21:58 | 
+Após reabrir — dashboard linhas: 1 | primeira linha: 1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 18/11/2026 10:16 | 
 [Confirmação carga demo] Dados de demonstração :: Carregar a demonstração em três polos do agronegócio, com clima REAL do INMET?  • Sorriso/MT — soja e milho safrinha (estação A904) • Rio Verde/GO — soja e milho safrinha (estação A025) • Patrocínio/MG — café (estação A523)  Municípios e clima (temperatura, umidade do ar, chuva) são reais. Propriedades, talhões e ocorrências são fictícios [DEMO]; a umidade do solo é simulada.
 [Carga demo concluída] SMField :: Dados de demonstração carregados.
 Dashboard demo linhas: 7
    5 | [DEMO] Fazenda Santa Helena | Talhão Milho Safrinha | Milho | 60 | 68 | Alto | 31/08/2026 12:00 | 
-   1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 17/11/2026 21:58 | 
+   1 | Fazenda Modelo | Talhão A | Milho | 12 | 68 | Alto | 18/11/2026 10:16 | 
    4 | [DEMO] Fazenda Santa Helena | Talhão Soja | Soja | 80 | 53 | Médio | 31/10/2026 12:00 | 
    3 | [DEMO] Fazenda Boa Esperança | Talhão Milho Safrinha | Milho | 95 | 45 | Médio | 30/06/2026 12:00 | 
    2 | [DEMO] Fazenda Boa Esperança | Talhão Soja 26/27 | Soja | 120 | 28 | Baixo | 31/10/2026 12:00 | 

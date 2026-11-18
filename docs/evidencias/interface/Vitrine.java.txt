@@ -1,0 +1,69 @@
+import service.ServicosSMField;
+import ui.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.nio.file.*;
+import java.lang.reflect.*;
+
+/** Abre a janela com dados de demonstração e salva uma captura de cada seção. */
+public class Vitrine {
+    public static void main(String[] a) throws Exception {
+        String saida = a.length > 0 ? a[0] : "/tmp/vitrine";
+        int w = a.length > 1 ? Integer.parseInt(a[1]) : 1440, h = a.length > 2 ? Integer.parseInt(a[2]) : 900;
+        String so = a.length > 3 ? a[3] : "";
+        new File(saida).mkdirs();
+        Path dados = Files.createTempDirectory("vitrine");
+        Method m = AppMain.class.getDeclaredMethod("configurarAparencia"); m.setAccessible(true);
+        SwingUtilities.invokeAndWait(() -> { try { m.invoke(null); } catch (Exception e) { throw new RuntimeException(e); } });
+        ServicosSMField s = new ServicosSMField(dados);
+        if (System.getenv("VITRINE_VAZIO") == null) s.demonstracao().carregar();
+        MainFrame[] f = new MainFrame[1];
+        SwingUtilities.invokeAndWait(() -> { f[0] = new MainFrame(s); f[0].setSize(w, h); f[0].setLocation(0,0); f[0].setVisible(true); });
+        Thread.sleep(1500);
+        if (System.getenv("VITRINE_RECOLHER") != null) {
+            Field fm = MainFrame.class.getDeclaredField("menuLateral"); fm.setAccessible(true);
+            Object bl = fm.get(f[0]);
+            SwingUtilities.invokeAndWait(() -> { try { bl.getClass().getMethod("alternar").invoke(bl); } catch (Exception e) { throw new RuntimeException(e); } });
+            Thread.sleep(600);
+        }
+        Field fa = MainFrame.class.getDeclaredField("abas"); fa.setAccessible(true);
+        JTabbedPane abas = (JTabbedPane) fa.get(f[0]);
+        for (int i = 0; i < abas.getTabCount(); i++) {
+            if (!so.isEmpty() && !so.contains(String.valueOf(i))) continue;
+            int idx = i;
+            SwingUtilities.invokeAndWait(() -> abas.setSelectedIndex(idx));
+            Thread.sleep(idx == 7 ? 2500 : 600);
+            if (idx == 4) { // consulta: seleciona talhão de risco alto
+                Field fd = MainFrame.class.getDeclaredField("detalhes"); fd.setAccessible(true);
+                Object det = fd.get(f[0]);
+                SwingUtilities.invokeAndWait(() -> { try { det.getClass().getMethod("selecionarTalhao", long.class).invoke(det, 4L); } catch (Exception e) { throw new RuntimeException(e);} });
+                Thread.sleep(400);
+            }
+            if (idx == 8) {
+                Object p = abas.getComponentAt(8);
+                Field fb = p.getClass().getDeclaredField("comboMunicipio"); fb.setAccessible(true);
+                JComboBox<?> cb = (JComboBox<?>) fb.get(p);
+                Field fbt = p.getClass().getDeclaredField("botaoAvaliar"); fbt.setAccessible(true);
+                SwingUtilities.invokeAndWait(() -> { for (int k=0;k<cb.getItemCount();k++) if (cb.getItemAt(k).toString().contains("Sorriso")) cb.setSelectedIndex(k); ((JButton)fbtGet(fbt,p)).doClick(); });
+                Thread.sleep(400);
+            }
+            if (idx == 7) {
+                Object p = abas.getComponentAt(7);
+                Field fb = p.getClass().getDeclaredField("botaoPrevia"); fb.setAccessible(true);
+                SwingUtilities.invokeAndWait(() -> ((JButton)fbtGet(fb,p)).doClick());
+                Thread.sleep(600);
+            }
+            foto(f[0], saida + "/" + String.format("%02d", i) + ".png");
+        }
+        System.exit(0);
+    }
+    static Object fbtGet(Field f, Object o) { try { return f.get(o); } catch (Exception e) { throw new RuntimeException(e); } }
+    static void foto(JFrame f, String arq) throws Exception {
+        Robot r = new Robot();
+        Rectangle b = f.getBounds();
+        BufferedImage img = r.createScreenCapture(b);
+        javax.imageio.ImageIO.write(img, "png", new File(arq));
+    }
+}

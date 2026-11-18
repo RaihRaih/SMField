@@ -125,8 +125,8 @@ public class RoteiroGui {
         texto(pOco, "campoDescricao", "Manchas nas folhas observadas na vistoria (teste de interface)");
         clicarEResponder(pOco, "botaoSalvar", "Registro de ocorrência", 0);
         foto("13-ocorrencias");
-        aba(abas2, abas2.indexOfTab("Compatibilidade (demo)"));
-        Object pComp = abas2.getComponentAt(abas2.indexOfTab("Compatibilidade (demo)"));
+        aba(abas2, abas2.indexOfTab("Compatibilidade de culturas"));
+        Object pComp = abas2.getComponentAt(abas2.indexOfTab("Compatibilidade de culturas"));
         SwingUtilities.invokeAndWait(() -> {
             JComboBox<?> c = (JComboBox<?>) campoSilencioso(pComp, "comboMunicipio");
             for (int i = 0; i < c.getItemCount(); i++) if (c.getItemAt(i).toString().contains("Sorriso")) c.setSelectedIndex(i);
@@ -164,7 +164,7 @@ public class RoteiroGui {
     static String linha(Object painel, int r) throws Exception {
         JTable t = (JTable) campo(painel, "tabela");
         StringBuilder sb = new StringBuilder();
-        for (int c = 0; c < t.getColumnCount(); c++) sb.append(t.getValueAt(r, c)).append(" | ");
+        for (int c = 0; c < t.getModel().getColumnCount(); c++) sb.append(t.getModel().getValueAt(t.convertRowIndexToModel(r), c)).append(" | ");
         return sb.toString();
     }
 

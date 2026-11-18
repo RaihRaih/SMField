@@ -14,9 +14,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.List;
 
 /** RF-01 e RF-03: cadastro de propriedades e consulta dos talhões de cada propriedade. */
@@ -27,10 +24,10 @@ public class PropriedadePanel extends JPanel implements Atualizavel {
 
     private final JTextField campoNome = new JTextField(24);
     private final JTextField campoMunicipio = new JTextField(24);
-    private final JLabel rotuloModo = Estilo.nota("Novo cadastro");
-    private final JButton botaoSalvar = Estilo.botaoPrimario("Salvar propriedade");
-    private final JButton botaoNovo = Estilo.botao("Limpar / novo");
-    private final JButton botaoExcluir = Estilo.botao("Excluir propriedade");
+    private final JLabel rotuloModo = Estilo.indicadorModo("Novo cadastro");
+    private final JButton botaoSalvar = Estilo.botaoPrimario("Salvar propriedade", Icone.Tipo.CHECK);
+    private final JButton botaoNovo = Estilo.botao("Limpar / novo", Icone.Tipo.LIMPAR);
+    private final JButton botaoExcluir = Estilo.botaoPerigo("Excluir");
 
     private final DefaultTableModel modeloPropriedades = Estilo.modelo("ID", "Propriedade", "Município", "Talhões");
     private final JTable tabelaPropriedades = Estilo.tabela(modeloPropriedades);
@@ -44,27 +41,41 @@ public class PropriedadePanel extends JPanel implements Atualizavel {
     public PropriedadePanel(ServicosSMField servicos, Runnable aoAlterar) {
         this.servicos = servicos;
         this.aoAlterar = aoAlterar;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        setBackground(Estilo.CINZA_FUNDO);
-
-        add(Estilo.titulo("Propriedades rurais"), BorderLayout.NORTH);
+        Estilo.pagina(this);
+        add(Estilo.cabecalho("Propriedades rurais",
+                "Cadastre, edite e consulte as propriedades e os talhões vinculados a cada uma."), BorderLayout.NORTH);
         add(criarFormulario(), BorderLayout.WEST);
 
-        JPanel lista = new JPanel(new BorderLayout(4, 4));
-        lista.setBorder(Estilo.secao("Propriedades cadastradas"));
-        lista.add(Estilo.rolagem(tabelaPropriedades), BorderLayout.CENTER);
-        lista.add(avisoPropriedades, BorderLayout.SOUTH);
+        Cartao lista = new Cartao("Propriedades cadastradas", "Selecione uma linha para editar ou ver os talhões",
+                Icone.Tipo.PROPRIEDADE);
+        tabelaPropriedades.getColumnModel().getColumn(0).setMaxWidth(56);
+        tabelaPropriedades.getColumnModel().getColumn(1).setPreferredWidth(300);
+        tabelaPropriedades.getColumnModel().getColumn(2).setPreferredWidth(200);
+        tabelaPropriedades.getColumnModel().getColumn(2).setCellRenderer(Estilo.renderizadorComIcone(Icone.Tipo.LOCAL));
+        tabelaPropriedades.getColumnModel().getColumn(3).setMaxWidth(90);
+        tabelaPropriedades.getColumnModel().getColumn(3).setCellRenderer(Estilo.renderizadorContagem());
+        lista.corpo().add(Estilo.rolagem(tabelaPropriedades), BorderLayout.CENTER);
+        lista.corpo().add(avisoPropriedades, BorderLayout.SOUTH);
 
-        JPanel talhoes = new JPanel(new BorderLayout(4, 4));
-        talhoes.setBorder(Estilo.secao("Talhões da propriedade selecionada"));
-        talhoes.add(Estilo.rolagem(tabelaTalhoes), BorderLayout.CENTER);
-        talhoes.add(avisoTalhoes, BorderLayout.SOUTH);
+        Cartao talhoes = new Cartao("Talhões da propriedade selecionada", "Consulta dos talhões vinculados",
+                Icone.Tipo.TALHAO);
+        tabelaTalhoes.getColumnModel().getColumn(0).setMaxWidth(56);
+        tabelaTalhoes.getColumnModel().getColumn(2).setMinWidth(96);
+        tabelaTalhoes.getColumnModel().getColumn(2).setMaxWidth(120);
+        tabelaTalhoes.getColumnModel().getColumn(3).setCellRenderer(Estilo.renderizadorComIcone(Icone.Tipo.BROTO));
+        talhoes.corpo().add(Estilo.rolagem(tabelaTalhoes), BorderLayout.CENTER);
+        talhoes.corpo().add(avisoTalhoes, BorderLayout.SOUTH);
 
         JSplitPane divisao = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lista, talhoes);
         divisao.setResizeWeight(0.55);
         divisao.setBorder(null);
-        add(divisao, BorderLayout.CENTER);
+        divisao.setOpaque(false);
+        divisao.setDividerSize(14);
+        JPanel centro = new JPanel(new BorderLayout());
+        centro.setOpaque(false);
+        centro.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
+        centro.add(divisao, BorderLayout.CENTER);
+        add(centro, BorderLayout.CENTER);
 
         botaoSalvar.addActionListener(e -> salvar());
         botaoNovo.addActionListener(e -> limpar());
@@ -78,30 +89,24 @@ public class PropriedadePanel extends JPanel implements Atualizavel {
     }
 
     private JPanel criarFormulario() {
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(Estilo.secao("Cadastro"));
-        GridBagConstraints c = Estilo.gbc(0, 0);
-        form.add(new JLabel("Nome da propriedade *"), c);
-        c.gridy++;
-        form.add(campoNome, c);
-        c.gridy++;
-        form.add(new JLabel("Município *"), c);
-        c.gridy++;
-        form.add(campoMunicipio, c);
-        c.gridy++;
-        form.add(rotuloModo, c);
-        c.gridy++;
-        JPanel botoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 4));
-        botoes.setOpaque(false);
-        botoes.add(botaoSalvar);
-        form.add(botoes, c);
-        c.gridy++;
-        form.add(botaoNovo, c);
-        c.gridy++;
-        form.add(botaoExcluir, c);
-        c.gridy++;
-        c.weighty = 1;
-        form.add(Estilo.nota("* campos obrigatórios"), c);
+        Cartao form = new Cartao("Cadastro", "Campos com * são obrigatórios", Icone.Tipo.MAIS);
+        JPanel col = Estilo.coluna();
+        Estilo.empilhar(col, rotuloModo, 14);
+        Estilo.exemplo(campoNome, "Ex.: Fazenda Boa Vista");
+        Estilo.exemplo(campoMunicipio, "Ex.: Sorriso/MT");
+        campoMunicipio.putClientProperty("JTextField.leadingIcon", Icone.de(Icone.Tipo.LOCAL, 15, Estilo.TEXTO_FRACO));
+        Estilo.empilhar(col, Estilo.blocoCampo("Nome da propriedade", true, campoNome), 14);
+        Estilo.empilhar(col, Estilo.blocoCampo("Município", true, campoMunicipio), 6);
+        Estilo.empilhar(col, Estilo.dica("Use Cidade/UF para achar a estação do INMET."), 18);
+        Estilo.empilhar(col, botaoSalvar, 10);
+        JPanel secundarios = new JPanel(new java.awt.GridLayout(1, 2, 10, 0));
+        secundarios.setOpaque(false);
+        secundarios.add(botaoNovo);
+        secundarios.add(botaoExcluir);
+        secundarios.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, botaoNovo.getPreferredSize().height));
+        Estilo.empilhar(col, secundarios, 0);
+        form.corpo().add(col, BorderLayout.NORTH);
+        form.setPreferredSize(new java.awt.Dimension(360, 300));
         return form;
     }
 
